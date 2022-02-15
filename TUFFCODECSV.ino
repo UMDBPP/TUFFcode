@@ -178,7 +178,7 @@ void loop() {
   else {
     Serial.println("error opening datalog.txt");
   }
-
+  /*
 //==================Serial Monitoring============
     Serial.print(timelog.year(), DEC); Serial.print("/"); Serial.print(timelog.month(), DEC); Serial.print("/"); Serial.print(timelog.day(), DEC); Serial.print(" | "); 
     Serial.print(timelog.hour(), DEC); Serial.print(":"); Serial.print(timelog.minute(), DEC); Serial.print(":"); Serial.print(timelog.second(), DEC);
@@ -190,10 +190,10 @@ void loop() {
     Serial.print(',');
     Serial.println();
 
-    /*//Temprature data
+    Temprature data
     Serial.print("Temp: "); Serial.print(temp); Serial.print(" C");
     Serial.print(',');
-    Serial.println();*/
+    Serial.println();*
 
     //BMP Data
     Serial.print("BaroTemp: "); Serial.print(bmptemp); Serial.print(" C");
@@ -208,23 +208,7 @@ void loop() {
 
     //Formatting
     Serial.println("-------------");
+    */
 
-  //LED Identifier for writing
-  if (counter > 20)
-  {
-    ///
-    
-  }
-  else if (counter > 10)
-  {
-    ///
-    counter = 0;
-  }
   
-  counter++;
-  digitalWrite(ledPin, HIGH); // turn on the led
-  delay(100);
-
-  digitalWrite(ledPin, LOW); // turn off the LED
-  delay(100);
 }
