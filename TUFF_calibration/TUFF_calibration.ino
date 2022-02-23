@@ -57,6 +57,8 @@ void setup() {
   Serial.begin(9600);
   Serial.println("BEGIN CALIBRATION CODE");
   pinMode(LED_BUILTIN, OUTPUT); // Declare LED as an output pin
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
   digitalWrite(LED_BUILTIN, LOW);
 
   // Initialize HX711 with pinning.
@@ -66,6 +68,7 @@ void setup() {
   loadcell.set_scale();
   loadcell.tare();
 
+  digitalWrite(LED_BUILTIN, HIGH);
   Serial.println("Zeroing the load cell...");
   delay(5000);
   Serial.println("Load cell is zeroed and ready to go!");
@@ -79,10 +82,8 @@ void setup() {
  ===========================================================================*/
 void loop() {
   float known_weight = 1;
-  float offset = loadcell.get_units(10) / known_weight;
-  Serial.print("Offset: ");
-  Serial.println(loadcell.get_units(10));
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
+  float divider_scale = loadcell.get_units(50) / known_weight;
+  Serial.print("Divider scale: ");
+  Serial.println(divider_scale);
+  delay(100);
 }
