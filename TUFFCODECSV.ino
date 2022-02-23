@@ -1,16 +1,20 @@
 /*===========================================================================
  * T.U.F.F (Tension Under Flight Forces) UMD BPP In-Flight Code
+ * By Jeremy Kuznetsov and Jaxon Lee
  ===========================================================================*/
-// Yo !!!
-// Libraries
-#include <HX711.h>              //HX711 by Bogdan Necula
-#include <SPI.h>
-#include <SD.h>
-#include <Wire.h>               
-#include <OneWire.h>            //OneWire by Paul Stroffregen
-#include <DallasTemperature.h>  //DallasTemperature by Miles Burton
-#include <RTClib.h>             //RTClib by Adafruit
-#include <Adafruit_BMP280.h>    //BMP280 by Adafruit
+
+// Librariess
+#include <HX711.h>              // HX711 0.7.5 by Bogdan Necula
+#include <SPI.h>                // Built in
+#include <SD.h>                 // Built in
+#include <Wire.h>               // Built in
+#include <OneWire.h>            // OneWire 2.3.6 by Paul Stroffregen et. al
+#include <DallasTemperature.h>  // DallasTemperature 3.9.0 by Miles Burton 
+
+#include <RTClib.h>             // RTClib 2.0.2 by Adafruit. 
+                                // NOTE: Dependent on BusIO 1.11.1 by Adafruit.
+#include <Adafruit_BMP280.h>    // BMP280 2.6.1 by Adafruit. 
+                                // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
 
 
 //Misc Defining
@@ -70,10 +74,10 @@ void setup() {
 //--------------------------
   
   //Initialize HX711 with pinning/offsets/calibration
-  loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
-  loadcell.set_offset(LOADCELL_OFFSET);
+  loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); 
+  loadcell.set_offset(LOADCELL_OFFSET);  
   loadcell.set_scale(LOADCELL_DIVIDER);
-
+ 
   // Zero scale
   loadcell.tare();
 
@@ -116,13 +120,13 @@ void loop() {
 
 //----------------------
   // Attempt to get reading from loadcell, retry if failed
-  if (loadcell.wait_ready_retry(10)) {
+  //if (loadcell.wait_ready_retry(10)) {
     //Stores reading from loadcell
-    tension = loadcell.get_units(10);
-  }
-  else {
-    Serial.println("HX711 not found.");
-  }
+    tension = loadcell.get_units(1);
+ // }
+  //else {
+  //  Serial.println("HX711 not found.");
+ // }
 //---------------------
   // Get reading from RTC
   timelog = rtc.now();
@@ -178,37 +182,12 @@ void loop() {
   else {
     Serial.println("error opening datalog.txt");
   }
-  /*
+
 //==================Serial Monitoring============
-    Serial.print(timelog.year(), DEC); Serial.print("/"); Serial.print(timelog.month(), DEC); Serial.print("/"); Serial.print(timelog.day(), DEC); Serial.print(" | "); 
-    Serial.print(timelog.hour(), DEC); Serial.print(":"); Serial.print(timelog.minute(), DEC); Serial.print(":"); Serial.print(timelog.second(), DEC);
-    Serial.print(',');
-    Serial.println();
 
     //Tension Data
     Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
     Serial.print(',');
     Serial.println();
 
-    Temprature data
-    Serial.print("Temp: "); Serial.print(temp); Serial.print(" C");
-    Serial.print(',');
-    Serial.println();*
-
-    //BMP Data
-    Serial.print("BaroTemp: "); Serial.print(bmptemp); Serial.print(" C");
-    Serial.print(',');
-    Serial.println();
-    Serial.print("Pressure: "); Serial.print(pressure); Serial.print(" Pa");
-    Serial.print(',');
-    Serial.println();
-    Serial.print("Altitude: "); Serial.print(alt); Serial.print(" m");
-    Serial.print(',');
-    Serial.println();
-
-    //Formatting
-    Serial.println("-------------");
-    */
-
-  
 }
