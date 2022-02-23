@@ -8,8 +8,6 @@
 #include <SPI.h>                // Built in
 #include <SD.h>                 // Built in
 #include <Wire.h>               // Built in
-#include <OneWire.h>            // OneWire 2.3.6 by Paul Stroffregen et. al
-#include <DallasTemperature.h>  // DallasTemperature 3.9.0 by Miles Burton 
 
 #include <RTClib.h>             // RTClib 2.0.2 by Adafruit. 
                                 // NOTE: Dependent on BusIO 1.11.1 by Adafruit.
@@ -60,9 +58,10 @@ const float sealevelpressure = 1017.25; //hPa of local sea level pressure, I ass
 void setup() {
   Serial.begin(9600);
 
-//----------------------------
+  Serial.println("BEGIN IN-FLIGHT CODE");
+  //----------------------------
 
- //SD Card Test
+  // SD Card Test
   Serial.print("Initializing SD card...");
 
   if (!SD.begin(CS)) {
