@@ -3,7 +3,7 @@
  * By Jeremy Kuznetsov and Jaxon Lee
  ===========================================================================*/
 
-// Librariess
+// Libraries
 #include <HX711.h>              // HX711 0.7.5 by Bogdan Necula
 #include <SPI.h>                // Built in
 #include <SD.h>                 // Built in
@@ -36,7 +36,7 @@ const int LOADCELL_SCK_PIN = 3;
 
 // Constants: Offsets for Load Cell Calibration
 const long LOADCELL_OFFSET = 50682624;
-const long LOADCELL_DIVIDER = 30000; //This is measured to calibrate our cell specifically
+const long LOADCELL_DIVIDER = 27763.80333; // This is measured to calibrate our cell specifically
 
 //Variables
 float tension = 0; //Tension sensor data
@@ -91,7 +91,7 @@ void setup() {
 
   rtc.begin();
   
-  //Set RTC Date/Time
+  // Set RTC Date/Time
   rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); 
   
 //-------------------------
@@ -184,7 +184,7 @@ void loop() {
 
 //==================Serial Monitoring============
 
-    //Tension Data
+    // Tension Data
     Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
     Serial.print(',');
     Serial.println();
