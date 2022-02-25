@@ -1,6 +1,8 @@
 /*===========================================================================
  * T.U.F.F (Tension Under Flight Forces) UMD BPP In-Flight Code
  * By Jeremy Kuznetsov and Jaxon Lee
+ * 
+ * This keeps track of tension data on BPP balloon launches using a load cell.
  ===========================================================================*/
 
 // Libraries
