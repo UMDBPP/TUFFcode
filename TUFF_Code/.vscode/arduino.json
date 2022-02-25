@@ -1,6 +1,4 @@
 {
     "board": "arduino:avr:uno",
-    "programmer": "arduino:avrispmkii",
-    "port": "/dev/tty.usbmodem1101",
-    "sketch": "TUFFcode/TUFF_hertz_checker/TUFF_hertz_checker.ino"
+    "port": "/dev/tty.usbmodem1101"
 }
