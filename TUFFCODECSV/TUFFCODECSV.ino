@@ -93,8 +93,8 @@ void setup() {
 
   rtc.begin();
   
-  // Set RTC Date/Time
-  rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); 
+  // Set RTC Date/Time. This only needs to be run once EVER.
+  // rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); 
   
 //-------------------------
 
