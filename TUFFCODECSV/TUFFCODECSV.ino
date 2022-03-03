@@ -94,7 +94,7 @@ void setup() {
   rtc.begin();
   
   // Set RTC Date/Time. This only needs to be run once EVER.
-  // rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); 
+  //rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); 
   
 //-------------------------
 
@@ -171,7 +171,7 @@ void loop() {
 
 //==================Serial Monitoring============
     // Tension Data
-    Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
+  /*Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
     Serial.print(',');
-    Serial.println();
+    Serial.println();*/    
 }
