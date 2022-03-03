@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "port": "/dev/tty.usbmodem1101",
+    "port": "/dev/tty.usbmodem1401",
     "programmer": "arduino:avrispmkii",
-    "sketch": "TUFF_calibration/TUFF_calibration.ino"
+    "sketch": "TUFFCODECSV/TUFFCODECSV.ino"
 }

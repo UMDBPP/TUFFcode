@@ -26,8 +26,6 @@
 //Declaring Objects
 HX711 loadcell;
 RTC_DS1307 rtc;
-//OneWire oneWire(ONE_WIRE_BUS);
-//DallasTemperature tempS(&oneWire);
 Adafruit_BMP280 bmp;
 Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();
 Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
@@ -35,6 +33,8 @@ Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
 //Wiring for the HX711 Amplifier
 const int LOADCELL_DOUT_PIN = 2;
 const int LOADCELL_SCK_PIN = 3;
+
+
 
 // Constants: Offsets for Load Cell Calibration
 const long LOADCELL_OFFSET = 50682624;
@@ -78,7 +78,7 @@ void setup() {
   loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); 
   loadcell.set_offset(LOADCELL_OFFSET);  
   loadcell.set_scale(LOADCELL_DIVIDER);
- 
+
   // Zero scale
   loadcell.tare();
 
@@ -121,27 +121,17 @@ void loop() {
 
 //----------------------
   // Attempt to get reading from loadcell, retry if failed
-  //if (loadcell.wait_ready_retry(10)) {
-    //Stores reading from loadcell
-    tension = loadcell.get_units(1);
- // }
-  //else {
-  //  Serial.println("HX711 not found.");
- // }
+  tension = loadcell.get_units(1);
+
 //---------------------
   // Get reading from RTC
   timelog = rtc.now();
-//--------------------
-  /* //Getting reading from temp sensor
-  tempS.requestTemperatures();
-  temp = tempS.getTempCByIndex(0);
-  if(temp = DEVICE_DISCONNECTED_C){
-    Serial.println("Could not read temperature data"); 
-  }*/
+
 //--------------------
   bmptemp = bmp.readTemperature();
   pressure = bmp.readPressure();
   alt = bmp.readAltitude(sealevelpressure);
+
 //--------------------
 
 // ==========Writing Data==========
@@ -162,11 +152,6 @@ void loop() {
     dataFile.print(tension);
     dataFile.print(",");
 
-    /*//Temprature data
-    dataFile.print("Temp: "); dataFile.print(temp); dataFile.print(" C");
-    dataFile.print(',');
-    dataFile.println();*/
-
     //BMP Data
     dataFile.print(bmptemp);
     dataFile.print(",");
@@ -185,10 +170,8 @@ void loop() {
   }
 
 //==================Serial Monitoring============
-
     // Tension Data
     Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
     Serial.print(',');
     Serial.println();
-
 }
