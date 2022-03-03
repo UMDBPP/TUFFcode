@@ -3,7 +3,7 @@
 
 Arduino code for _TUFF DOS_ payload for the Baloon Payload Program at the University of Maryland.
 
-Code by Jeremy Kuznetsov, ???, and Jaxon Lee.
+Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
 
 -------
 
