@@ -1,6 +1,6 @@
 /*===========================================================================
  * T.U.F.F (Tension Under Flight Forces) UMD BPP In-Flight Code
- * By Jeremy Kuznetsov and Jaxon Lee
+ * By Jeremy Kuznetsov, Jim Oliver Villegas, Jaxon Lee
  * 
  * This keeps track of tension data on BPP balloon launches using a load cell.
  ===========================================================================*/
@@ -12,7 +12,7 @@
 #include <Wire.h>               // Built in
 
 #include <RTClib.h>             // RTClib 2.0.2 by Adafruit. 
-                                // NOTE: Dependent on BusIO 1.11.1 by Adafruit.
+                                // NOTE: Dependent on Adafruit BusIO 1.11.1 by Adafruit.
 #include <Adafruit_BMP280.h>    // BMP280 2.6.1 by Adafruit. 
                                 // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
 
