@@ -6,3 +6,5 @@
 
 # Mac thumbnail viewer
 .DS_Store
+
+.vscode
