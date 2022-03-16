@@ -11,5 +11,5 @@ Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
 
 # Preceeding Flights
 - TUFF 105          Nov 14,     2021
-- TUFF 110          March 6,    2022
+- TUFF 110          March 5,    2022
 
