@@ -1,0 +1,207 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[110]:
+
+
+from matplotlib import pyplot as plt
+import numpy as np
+import math
+import csv
+import pandas as pd
+
+SAVE_TO = 'CSV_TUFF.CSV'
+OG = 'OG_TUFF.TXT'
+TIME_ONLY = 'TIME_ONLY.CSV'
+
+plt.rcParams["figure.figsize"] = [7.50, 3.50]
+plt.rcParams["figure.autolayout"] = True
+
+headers = ['Time', 'Tension', 'Temperature', 'Pressure', 'Altitude']
+
+read_file = pd.read_csv(OG, names=headers, index_col=False)
+read_file.to_csv(SAVE_TO, index='Time')
+
+
+# In[111]:
+
+
+print(read_file)
+
+
+# In[112]:
+
+
+print(SAVE_TO)
+
+
+# In[113]:
+
+
+csv_file = open('CSV_TUFF.csv')
+
+extract = ['Time']
+dataframe = pd.read_csv("CSV_TUFF.csv", usecols=extract, dtype={"Time":"string"})
+dataframe.to_csv('TIME_ONLY.CSV', index='Time')
+
+print(dataframe)
+
+
+# In[114]:
+
+
+print(dataframe.dtypes)
+
+
+# In[130]:
+
+
+new_times = []
+itr = 0;
+
+np_time = dataframe['Time'].to_numpy()
+
+for time in np_time:
+    new_times.append(time[(time.find("|") + 1):])
+
+
+# In[132]:
+
+
+print(new_times)
+
+
+# In[183]:
+
+
+raw_seconds = []
+
+for time in new_times:
+    hours = int(time[:(time.find(":"))])
+    sliced = time[(time.find(":") + 1):]
+    minutes = int(sliced[:(sliced.find(":"))])
+    sliced = sliced[(sliced.find(":") + 1):]
+    seconds = int(sliced)
+    
+    raw_sec = ((3600 * hours) + (60 * minutes) + seconds) - 36776
+        
+    
+    raw_seconds.append(raw_sec)
+    
+    
+    
+raw_seconds
+
+
+# In[188]:
+
+
+last_second = 0;
+sub_array = []
+i = 1
+j = 0;
+count = 1;
+
+for sec in range(len(raw_seconds) - 1):
+    if raw_seconds[i] == raw_seconds[i - 1]:
+        count = count + 1
+    else:        
+        if count > 0:
+            decimal = 1/count
+        else:
+            decimal = 0
+        while j < count:
+            #print(count)
+            raw_seconds[(i - count) + j] = raw_seconds[(i - count) + j] + (decimal * j)
+            j = j + 1
+            
+        #Resets counters  
+        count = 1  
+        j = 0
+        
+
+    i = i + 1
+    
+print(raw_seconds)
+
+
+# In[190]:
+
+
+print(raw_seconds[:100])
+
+
+# In[194]:
+
+
+print(read_file)
+
+
+# In[193]:
+
+
+print(read_file.dtypes)
+
+
+# In[195]:
+
+
+read_file['Time'] = raw_seconds
+
+
+# In[196]:
+
+
+print(read_file)
+
+
+# In[197]:
+
+
+read_file.plot(x ='Time', y='Tension', kind = 'line')
+
+
+# In[265]:
+
+
+new_df = read_file[15500:80000]
+
+
+# In[274]:
+
+
+z = np.linspace(0, 10, 1000)
+new_df.plot(x ='Time', y={'Tension'}, kind = 'line')
+new_df.plot(x ='Time', y={'Altitude'}, kind = 'line')
+
+
+# In[200]:
+
+
+new_df.plot(x ='Time', y='Temperature', kind = 'line')
+
+
+# In[238]:
+
+
+from scipy.io.wavfile import write
+from scipy.fft import fft, fftfreq
+
+N = 231615
+SAMPLE_RATE = 12
+
+yf = fft(np.array(read_file['Tension']))
+xf = fftfreq(N, 1 / SAMPLE_RATE)
+
+write("TUFF_WAV.wav", SAMPLE_RATE, np.array(read_file['Tension']))
+
+plt.xlim((-0.002, 0.002))
+plt.plot(xf, np.abs(yf))
+plt.show()
+
+
+# In[ ]:
+
+
+
+
