@@ -4,6 +4,7 @@
 # In[110]:
 
 
+from curses.ascii import alt
 from matplotlib import pyplot as plt
 import numpy as np
 import math
@@ -11,7 +12,7 @@ import csv
 import pandas as pd
 
 SAVE_TO = 'CSV_TUFF.CSV'
-OG = 'OG_TUFF.TXT'
+OG = 'TUFF_DATA.TXT'
 TIME_ONLY = 'TIME_ONLY.CSV'
 
 plt.rcParams["figure.figsize"] = [7.50, 3.50]
@@ -26,13 +27,13 @@ read_file.to_csv(SAVE_TO, index='Time')
 # In[111]:
 
 
-print(read_file)
+#print(read_file)
 
 
 # In[112]:
 
 
-print(SAVE_TO)
+#print(SAVE_TO)
 
 
 # In[113]:
@@ -44,20 +45,20 @@ extract = ['Time']
 dataframe = pd.read_csv("CSV_TUFF.csv", usecols=extract, dtype={"Time":"string"})
 dataframe.to_csv('TIME_ONLY.CSV', index='Time')
 
-print(dataframe)
+#print(dataframe)
 
 
 # In[114]:
 
 
-print(dataframe.dtypes)
+#print(dataframe.dtypes)
 
 
 # In[130]:
 
 
 new_times = []
-itr = 0;
+itr = 0
 
 np_time = dataframe['Time'].to_numpy()
 
@@ -68,7 +69,7 @@ for time in np_time:
 # In[132]:
 
 
-print(new_times)
+#print(new_times)
 
 
 # In[183]:
@@ -90,17 +91,17 @@ for time in new_times:
     
     
     
-raw_seconds
+#raw_seconds
 
 
 # In[188]:
 
 
-last_second = 0;
+last_second = 0
 sub_array = []
 i = 1
-j = 0;
-count = 1;
+j = 0
+count = 1
 
 for sec in range(len(raw_seconds) - 1):
     if raw_seconds[i] == raw_seconds[i - 1]:
@@ -122,25 +123,25 @@ for sec in range(len(raw_seconds) - 1):
 
     i = i + 1
     
-print(raw_seconds)
+#print(raw_seconds)
 
 
 # In[190]:
 
 
-print(raw_seconds[:100])
+#print(raw_seconds[:100])
 
 
 # In[194]:
 
 
-print(read_file)
+#print(read_file)
 
 
 # In[193]:
 
 
-print(read_file.dtypes)
+#print(read_file.dtypes)
 
 
 # In[195]:
@@ -152,7 +153,7 @@ read_file['Time'] = raw_seconds
 # In[196]:
 
 
-print(read_file)
+#print(read_file)
 
 
 # In[197]:
@@ -199,9 +200,40 @@ plt.xlim((-0.002, 0.002))
 plt.plot(xf, np.abs(yf))
 plt.show()
 
+# In[ ]:
+new_df['Variance2'] = new_df['Tension'].rolling(100).var()
+
+variance_plot = new_df.plot(x ='Time', y='Variance2', kind = 'line')
+alt_plot = new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = variance_plot, secondary_y = True)
+
+variance_plot.set_ylabel('Variance')
+alt_plot.set_ylabel('Altitude')
+
+x = new_df['Time'].to_numpy()
+y = new_df['Altitude'].to_numpy()
+print("Rough estimate: " + str(np.interp(3700, x,y)))
+
+
+
+
+
 
 # In[ ]:
+def rolling_window(a, window):
+    shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
+    strides = a.strides + (a.strides[-1],)
+    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides) 
 
 
+data = new_df['Tension'].to_numpy()
+rolling_window(data, 20)
+np.var(rolling_window(data, 20), -1)
+datavar=np.var(rolling_window(data, 20), -1)
+
+new_df['Variance'] = pd.Series(datavar)
 
 
+new_df.plot(x ='Time', y={'Variance'}, kind = 'line')
+new_df.plot(x ='Time', y={'Variance', 'Altitude'}, kind = 'line', secondary_y = True)
+
+# %%

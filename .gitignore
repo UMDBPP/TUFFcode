@@ -7,4 +7,13 @@
 # Mac thumbnail viewer
 .DS_Store
 
+# Jypter notebook files
+*.ipynb_checkpoints
+
+# Extra data files
+*.CSV
+*.wav
+
 .vscode
+
+

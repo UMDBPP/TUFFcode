@@ -17,8 +17,7 @@
                                 // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
 
 
-//Misc Defining
-#define ONE_WIRE_BUS 8 // Temperature probe data line
+// Misc Defining
 #define CS 10 // Chip Select on SD logger
 #define ledPin 9 // LED
 
@@ -40,14 +39,12 @@ const int LOADCELL_SCK_PIN = 3;
 const long LOADCELL_OFFSET = 50682624;
 const long LOADCELL_DIVIDER = 27763.80333; // This is measured to calibrate our cell specifically
 
-//Variables
-float tension = 0; //Tension sensor data
-DateTime timelog; //Timestamp data
-float temp = 0; //TempSensor Data
-float pressure = 0;
-float bmptemp = 0;
-float alt = 0;
-int counter = 0;
+// Variables
+float tension = 0;  // Tension sensor data
+DateTime timelog;   // Timestamp data
+float pressure = 0; // Measured in Pascals.
+float bmptemp = 0;  // Measured in degrees Celsius.
+float alt = 0;      // Measured in meters.
 
 // Constant
 const float sealevelpressure = 1017.25; //hPa of local sea level pressure, I assume?
@@ -95,10 +92,6 @@ void setup() {
   
   // Set RTC Date/Time. This only needs to be run once EVER.
   //rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); 
-  
-//-------------------------
-
- // tempS.begin(); //DallasTemp
 
 //-------------------------
 
