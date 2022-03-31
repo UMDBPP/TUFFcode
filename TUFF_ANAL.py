@@ -201,7 +201,7 @@ plt.plot(xf, np.abs(yf))
 plt.show()
 
 # In[ ]:
-new_df['Variance2'] = new_df['Tension'].rolling(100).var()
+new_df['Variance2'] = new_df['Tension'].rolling(1000).var()
 
 variance_plot = new_df.plot(x ='Time', y='Variance2', kind = 'line')
 alt_plot = new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = variance_plot, secondary_y = True)

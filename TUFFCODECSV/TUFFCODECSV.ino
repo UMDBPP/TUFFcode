@@ -164,7 +164,7 @@ void loop() {
 
 //==================Serial Monitoring============
     // Tension Data
-  /*Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
+    Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
     Serial.print(',');
-    Serial.println();*/    
+    Serial.println();    
 }
