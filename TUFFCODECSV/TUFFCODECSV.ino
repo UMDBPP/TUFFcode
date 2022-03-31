@@ -6,11 +6,10 @@
  ===========================================================================*/
 
 // Libraries
-#include <HX711.h>              // HX711 0.7.5 by Bogdan Necula
 #include <SPI.h>                // Built in
 #include <SD.h>                 // Built in
 #include <Wire.h>               // Built in
-
+#include <HX711.h>              // HX711 0.7.5 by Bogdan Necula
 #include <RTClib.h>             // RTClib 2.0.2 by Adafruit. 
                                 // NOTE: Dependent on Adafruit BusIO 1.11.1 by Adafruit.
 #include <Adafruit_BMP280.h>    // BMP280 2.6.1 by Adafruit. 
@@ -22,22 +21,25 @@
 #define ledPin 9 // LED
 
 
-//Declaring Objects
+// Declaring Objects
 HX711 loadcell;
 RTC_DS1307 rtc;
+// Gyro HERE
 Adafruit_BMP280 bmp;
 Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();
 Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
 
-//Wiring for the HX711 Amplifier
+// Wiring for the HX711 Amplifier
 const int LOADCELL_DOUT_PIN = 2;
 const int LOADCELL_SCK_PIN = 3;
 
 
 
-// Constants: Offsets for Load Cell Calibration
+// Loadcell calibration values. Calibrated to our load cell particularly.
+// Offset - "zeroing the loadcell"
+// Divider - "converting amp readings to lbs"
 const long LOADCELL_OFFSET = 50682624;
-const long LOADCELL_DIVIDER = 27763.80333; // This is measured to calibrate our cell specifically
+const long LOADCELL_DIVIDER = 27763.80333; 
 
 // Variables
 float tension = 0;  // Tension sensor data
@@ -55,6 +57,7 @@ const float sealevelpressure = 1017.25; //hPa of local sea level pressure, I ass
  ===========================================================================*/
 
 void setup() {
+  // MAKE SURE TO SET THE BAUD RATE IN VSCODE TO 9600
   Serial.begin(9600);
 
   Serial.println("BEGIN IN-FLIGHT CODE");
@@ -66,12 +69,12 @@ void setup() {
   if (!SD.begin(CS)) {
     Serial.println("Card failed, or not present");
   }
-
-  Serial.println("card initialized.");
-
+  else {
+    Serial.println("card initialized.");
+  }
 //--------------------------
   
-  //Initialize HX711 with pinning/offsets/calibration
+  // Initialize HX711 (load cell) with pinning/offsets/calibration
   loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); 
   loadcell.set_offset(LOADCELL_OFFSET);  
   loadcell.set_scale(LOADCELL_DIVIDER);
@@ -81,26 +84,28 @@ void setup() {
 
 //--------------------------
 
-  //Wait for RTC to respond
-  if(!rtc.begin()) {
+  // Alert user if RTC fails to open.
+  if (!rtc.begin()) {
     Serial.println("Couldn't find RTC");
     Serial.flush();
-    while (1) delay(10);
+    delay(10);
   }
 
+  // Ensures rtc begins.
   rtc.begin();
   
   // Set RTC Date/Time. This only needs to be run once EVER.
-  //rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); 
+  // rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); 
 
 //-------------------------
 
+  // Alert user if the BMP sensor fails to open.
   if (!bmp.begin()) {
     Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                       "try a different address!"));
-    while (1) delay(10);
   }
 
+  // Ensures the BMP sensor begins.
   bmp.begin();
 
 //-------------------------
