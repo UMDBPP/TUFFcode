@@ -14,6 +14,8 @@
                                 // NOTE: Dependent on Adafruit BusIO 1.11.1 by Adafruit.
 #include <Adafruit_BMP280.h>    // BMP280 2.6.1 by Adafruit. 
                                 // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
+#include <math.h>               // Used for gyro calculations
+                        
 
 
 // Misc Defining
@@ -80,7 +82,7 @@ void setup() {
   loadcell.set_scale(LOADCELL_DIVIDER);
 
   // Zero scale
-  loadcell.tare();
+  loadcell.tare(10);
 
 //--------------------------
 
@@ -166,10 +168,11 @@ void loop() {
   else {
     Serial.println("error opening datalog.txt");
   }
-
+  /*
 //==================Serial Monitoring============
     // Tension Data
     Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
     Serial.print(',');
     Serial.println();    
+    */
 }
