@@ -67,11 +67,11 @@ void setup() {
 void loop() {
   // The weight in POUNDS that you put on the load cell for calibration.
   // Note the "f" for float.
-  float known_weight = 5.14f;
+  float known_weight = 8.380674356f;
 
   // The divider scale required to convert load cell units to human readable units.
-  // This averages the load cell's value across 50 readings.
-  float divider_scale = loadcell.get_units(50) / known_weight;
+  // This averages the load cell's value across 100 readings.
+  float divider_scale = loadcell.get_units(100) / known_weight;
 
   Serial.print("Divider scale: ");
   Serial.println(divider_scale);

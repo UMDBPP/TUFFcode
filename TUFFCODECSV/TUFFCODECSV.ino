@@ -14,7 +14,6 @@
                                 // NOTE: Dependent on Adafruit BusIO 1.11.1 by Adafruit.
 #include <Adafruit_BMP280.h>    // BMP280 2.6.1 by Adafruit. 
                                 // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
-#include <math.h>               // Used for gyro calculations
                         
 
 
@@ -41,7 +40,7 @@ const int LOADCELL_SCK_PIN = 3;
 // Offset - "zeroing the loadcell"
 // Divider - "converting amp readings to lbs"
 const long LOADCELL_OFFSET = 50682624;
-const long LOADCELL_DIVIDER = 27763.80333; 
+const long LOADCELL_DIVIDER = 27451.29667; 
 
 // Variables
 float tension = 0;  // Tension sensor data
