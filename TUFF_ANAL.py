@@ -3,7 +3,6 @@
 
 # In[110]:
 
-
 from curses.ascii import alt
 from matplotlib import pyplot as plt
 import numpy as np
@@ -163,27 +162,22 @@ read_file.plot(x ='Time', y='Tension', kind = 'line')
 
 
 # In[265]:
-
+# Get rid of junk values from before and after launch
 
 new_df = read_file[15500:80000]
 
 
 # In[274]:
-
+# Tension, Altitude, and Temperature
 
 z = np.linspace(0, 10, 1000)
 new_df.plot(x ='Time', y={'Tension'}, kind = 'line')
 new_df.plot(x ='Time', y={'Altitude'}, kind = 'line')
-
-
-# In[200]:
-
-
-new_df.plot(x ='Time', y='Temperature', kind = 'line')
+new_df.plot(x ='Time', y={'Temperature'}, kind = 'line')
 
 
 # In[238]:
-
+# Variance
 
 from scipy.io.wavfile import write
 from scipy.fft import fft, fftfreq
@@ -214,10 +208,55 @@ y = new_df['Altitude'].to_numpy()
 print("Rough estimate: " + str(np.interp(3700, x,y)))
 
 
-print("Ascent/Descent value: " + np.where(new_df['Altitude'].to_numpy() == max(new_df['Altitude'])))
+print("Ascent/Descent value: " + str(np.where(new_df['Altitude'].to_numpy() 
+                                              == max(new_df['Altitude']))))
+
+# In[ ]:
+weight = 8.576236354
+weight_array_a = np.full([39571], weight)
+weight_array_d = np.full([24929], weight)
+array_of_ascent_tension = new_df[:39571]['Tension']
+array_of_descent_tension = new_df[39571:]['Tension']
+
+# Performs weight arithmetic
+drag_ascent = np.subtract(array_of_ascent_tension.to_numpy(), weight_array_a)
+drag_descent = np.add(array_of_descent_tension.to_numpy(), weight_array_d)
+
+# Concatenates drags
+drag = np.concatenate((drag_ascent, drag_descent))
+
+new_df['Drag'] = drag
+
+# Only consider values of for below 10,000 m
+ten_thousand_cutoffs = np.where(abs(new_df['Altitude'].to_numpy() - 10000) <= 10)
+df = pd.concat([new_df[:17934], new_df[49131:]])
+
+FINAL_DATA = df
 
 
+# In[ ]:
+import tensorflow as tf
+import numpy as np
+from numpy import array
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, LSTM
+import math
+from sklearn.metrics import mean_squared_error
+import os
 
+ML_df = []
+train_data = []
+test_data = []
+X_train = []
+X_test = []
+Y_train = []
+Y_test = []
+model = Sequential()
+
+print("klklklklk")
 
 
 
