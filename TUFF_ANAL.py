@@ -214,11 +214,16 @@ y = new_df['Altitude'].to_numpy()
 print("Rough estimate: " + str(np.interp(3700, x,y)))
 
 
+print("Ascent/Descent value: " + np.where(new_df['Altitude'].to_numpy() == max(new_df['Altitude'])))
+
+
+
 
 
 
 
 # In[ ]:
+"""
 def rolling_window(a, window):
     shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
     strides = a.strides + (a.strides[-1],)
@@ -235,5 +240,6 @@ new_df['Variance'] = pd.Series(datavar)
 
 new_df.plot(x ='Time', y={'Variance'}, kind = 'line')
 new_df.plot(x ='Time', y={'Variance', 'Altitude'}, kind = 'line', secondary_y = True)
+"""
 
 # %%
