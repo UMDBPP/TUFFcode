@@ -6,17 +6,16 @@
  ===========================================================================*/
 
 // Libraries
-#include <SPI.h>                // Built in
-#include <SD.h>                 // Built in
-#include <Wire.h>               // Built in
-#include <HX711.h>              // HX711 0.7.5 by Bogdan Necula
-#include <RTClib.h>             // RTClib 2.0.2 by Adafruit. 
-                                // NOTE: Dependent on Adafruit BusIO 1.11.1 by Adafruit.
-#include <Adafruit_BMP280.h>    // BMP280 2.6.1 by Adafruit. 
-                                // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
+#include <SPI.h>                  // Built in
+#include <SD.h>                   // Built in
+#include <Wire.h>                 // Built in
+#include <HX711.h>                // HX711 0.7.5 by Bogdan Necula
+#include <RTClib.h>               // RTClib 2.0.2 by Adafruit. 
+                                  // NOTE: Dependent on Adafruit BusIO 1.11.1 by Adafruit.
+#include <Adafruit_BMP280.h>      // BMP280 2.6.1 by Adafruit. 
+                                  // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
 
-#include <Adafruit_BMP085_U.h>
-#include <Adafruit_10DOF.h>
+#include <Adafruit_10DOF.h>       // Adafruit 10DOF 1.1.1 by Adafruit
 
 #include <Adafruit_AHRS_FusionInterface.h>
 #include <Adafruit_AHRS_Madgwick.h>
@@ -86,7 +85,7 @@ const float sealevelpressure = 1017.25; //hPa of local sea level pressure, I ass
 
 void setup() {
   // MAKE SURE TO SET THE BAUD RATE IN VSCODE TO 9600
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   Serial.println("BEGIN IN-FLIGHT CODE");
   //----------------------------
@@ -147,17 +146,14 @@ void setup() {
     /* There was a problem detecting the LSM303 ... check your connections */
     Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
   }
-  if(!bmp.begin())
-  {
-    /* There was a problem detecting the BMP085 ... check your connections */
-    Serial.print("Ooops, no BMP085 detected ... Check your wiring or I2C ADDR!");
-  }
   if(!gyro.begin())
   {
     /* There was a problem detecting the L3GD20 ... check your connections */
     Serial.print("Ooops, no L3GD20 detected ... Check your wiring or I2C ADDR!");
   }
-//-------------------------
+
+  Serial.print("START LOOP OF IN-FLIGHT CODE");
+  //-------------------------
   pinMode(ledPin, OUTPUT); // Declare LED as an output pin
 }
 
