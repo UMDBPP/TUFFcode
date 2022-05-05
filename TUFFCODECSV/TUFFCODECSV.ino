@@ -14,7 +14,27 @@
                                 // NOTE: Dependent on Adafruit BusIO 1.11.1 by Adafruit.
 #include <Adafruit_BMP280.h>    // BMP280 2.6.1 by Adafruit. 
                                 // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
-                        
+
+#include <Adafruit_BMP085_U.h>
+#include <Adafruit_10DOF.h>
+
+#include <Adafruit_AHRS_FusionInterface.h>
+#include <Adafruit_AHRS_Madgwick.h>
+#include <Adafruit_AHRS_Mahony.h>
+#include <Adafruit_AHRS_NXPFusion.h>
+#include <Adafruit_AHRS.h>
+#include <Adafruit_Sensor_Set.h>
+#include <Adafruit_Simple_AHRS.h>   // Adafruit AHRS 2.3.2 by Adafruit
+
+#include <Adafruit_L3GD20_U.h>
+#include <Adafruit_L3GD20.h>        // Adafruit L3GD20 2.0.1 by Adafruit
+
+
+
+#include <Adafruit_LSM303_U.h>
+#include <Adafruit_LSM303.h>        // Adafruit LSM303DLHC 1.0.4
+
+
 
 
 // Misc Defining
@@ -25,10 +45,14 @@
 // Declaring Objects
 HX711 loadcell;
 RTC_DS1307 rtc;
-// Gyro HERE
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
+Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
+Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 Adafruit_BMP280 bmp;
 Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();
 Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
+
+
 
 // Wiring for the HX711 Amplifier
 const int LOADCELL_DOUT_PIN = 2;
@@ -48,6 +72,9 @@ DateTime timelog;   // Timestamp data
 float pressure = 0; // Measured in Pascals.
 float bmptemp = 0;  // Measured in degrees Celsius.
 float alt = 0;      // Measured in meters.
+sensors_vec_t angular_momentum;
+sensors_vec_t linear_acceleration;
+sensors_vec_t magnometer_measurement;
 
 // Constant
 const float sealevelpressure = 1017.25; //hPa of local sea level pressure, I assume?
@@ -109,6 +136,27 @@ void setup() {
   // Ensures the BMP sensor begins.
   bmp.begin();
 
+  /* Initialise the sensors */
+  if(!accel.begin())
+  {
+    /* There was a problem detecting the ADXL345 ... check your connections */
+    Serial.println(F("Ooops, no LSM303 detected ... Check your wiring!"));
+  }
+  if(!mag.begin())
+  {
+    /* There was a problem detecting the LSM303 ... check your connections */
+    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+  }
+  if(!bmp.begin())
+  {
+    /* There was a problem detecting the BMP085 ... check your connections */
+    Serial.print("Ooops, no BMP085 detected ... Check your wiring or I2C ADDR!");
+  }
+  if(!gyro.begin())
+  {
+    /* There was a problem detecting the L3GD20 ... check your connections */
+    Serial.print("Ooops, no L3GD20 detected ... Check your wiring or I2C ADDR!");
+  }
 //-------------------------
   pinMode(ledPin, OUTPUT); // Declare LED as an output pin
 }
@@ -127,11 +175,26 @@ void loop() {
   timelog = rtc.now();
 
 //--------------------
+  // Get BMP readings
   bmptemp = bmp.readTemperature();
   pressure = bmp.readPressure();
   alt = bmp.readAltitude(sealevelpressure);
-
 //--------------------
+  // Get gyro/accelerometer readings
+  sensors_event_t event;
+
+  /* Get the results (gyrocope values in rad/s) */
+  gyro.getEvent(&event);
+  angular_momentum = event.gyro;
+
+  /* Get the results (acceleration is measured in m/s^2) */
+  accel.getEvent(&event);
+  linear_acceleration = event.acceleration;
+
+  /* Get the results (magnetic vector values are in micro-Tesla (uT)) */
+  mag.getEvent(&event);
+  magnometer_measurement = event.magnetic;
+
 
 // ==========Writing Data==========
 
@@ -158,7 +221,33 @@ void loop() {
     dataFile.print(",");
     dataFile.print(alt);
     dataFile.print(",");
+
+    // Gyro Data
+    dataFile.print(angular_momentum.x);
+    dataFile.print(",");
+    dataFile.print(angular_momentum.y);
+    dataFile.print(",");
+    dataFile.print(angular_momentum.z);
+    dataFile.print(",");
+
+    // Accelerometer Data
+    dataFile.print(linear_acceleration.x);
+    dataFile.print(",");
+    dataFile.print(linear_acceleration.y);
+    dataFile.print(",");
+    dataFile.print(linear_acceleration.z);
+    dataFile.print(",");
+
+    // Magnometer Data
+    dataFile.print(magnometer_measurement.x);
+    dataFile.print(",");
+    dataFile.print(magnometer_measurement.y);
+    dataFile.print(",");
+    dataFile.print(magnometer_measurement.z);
+    dataFile.print(",");
+
     
+
     dataFile.println();
 
     dataFile.close();

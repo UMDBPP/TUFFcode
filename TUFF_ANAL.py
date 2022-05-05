@@ -5,6 +5,7 @@
 
 from curses.ascii import alt
 from matplotlib import pyplot as plt
+import matplotlib
 import numpy as np
 import math
 import csv
@@ -220,18 +221,45 @@ array_of_descent_tension = new_df[39571:]['Tension']
 
 # Performs weight arithmetic
 drag_ascent = np.subtract(array_of_ascent_tension.to_numpy(), weight_array_a)
-drag_descent = np.add(array_of_descent_tension.to_numpy(), weight_array_d)
+drag_descent = np.subtract(weight_array_d, array_of_descent_tension.to_numpy())
+
 
 # Concatenates drags
 drag = np.concatenate((drag_ascent, drag_descent))
 
 new_df['Drag'] = drag
 
+new_df.plot(x = 'Time', y = 'Drag', kind = 'line')
+
+
 # Only consider values of for below 10,000 m
 ten_thousand_cutoffs = np.where(abs(new_df['Altitude'].to_numpy() - 10000) <= 10)
 df = pd.concat([new_df[:17934], new_df[49131:]])
 
 FINAL_DATA = df
+
+# In[ ]:
+drag_df = df
+
+# Plot drag against altitude
+drag_plot = drag_df.plot(x = 'Time', y = 'Drag', kind = 'line')
+drag_df.plot(x ='Time', y='Altitude', kind = 'line', ax = drag_plot, secondary_y = True)
+
+# Put lines where jet stream begins and ends
+drag_plot.axvline(x = 2645.5, color = 'red', linestyle = 'dashed')
+drag_plot.axvline(x = 6027.818181818182, color = 'red', linestyle = 'dashed')
+
+# Find average drag at different points
+drag_df['Average_drag'] = df['Drag'].rolling(500).mean()
+
+# Plot average drag against altitude
+drag_plot = drag_df.plot(x = 'Time', y = 'Average_drag', kind = 'line')
+drag_df.plot(x ='Time', y='Altitude', kind = 'line', ax = drag_plot, secondary_y = True)
+
+# Put lines where jet stream begins and ends
+drag_plot.axvline(x = 2645.5, color = 'red', linestyle = 'dashed')
+drag_plot.axvline(x = 6027.818181818182, color = 'red', linestyle = 'dashed')
+
 
 
 # In[ ]:
