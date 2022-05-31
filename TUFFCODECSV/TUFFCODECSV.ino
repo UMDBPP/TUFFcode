@@ -161,97 +161,103 @@ void setup() {
  * Loop
  ===========================================================================*/
 void loop() {
-
-//----------------------
-  // Attempt to get reading from loadcell, retry if failed
-  tension = loadcell.get_units(1);
-
-//---------------------
-  // Get reading from RTC
-  timelog = rtc.now();
-
-//--------------------
-  // Get BMP readings
-  bmptemp = bmp.readTemperature();
-  pressure = bmp.readPressure();
-  alt = bmp.readAltitude(sealevelpressure);
-//--------------------
-  // Get gyro/accelerometer readings
-  sensors_event_t event;
-
-  /* Get the results (gyrocope values in rad/s) */
-  gyro.getEvent(&event);
-  angular_momentum = event.gyro;
-
-  /* Get the results (acceleration is measured in m/s^2) */
-  accel.getEvent(&event);
-  linear_acceleration = event.acceleration;
-
-  /* Get the results (magnetic vector values are in micro-Tesla (uT)) */
-  mag.getEvent(&event);
-  magnometer_measurement = event.magnetic;
-
-
-// ==========Writing Data==========
-
+  int i;
   // To write to a file with this SD logger, you must first open the file
   File dataFile = SD.open("datalog.txt", FILE_WRITE);
 
-  // If the file is available (meaning that it could open the file from the SD card), write to it:
-  if (dataFile) {
+  for (i = 0; i < 10; i++) {
 
-    //Timestamp Data
-    dataFile.print(timelog.year(), DEC); dataFile.print("/"); dataFile.print(timelog.month(), DEC); dataFile.print("/"); dataFile.print(timelog.day(), DEC); dataFile.print("|"); 
-    dataFile.print(timelog.hour(), DEC); dataFile.print(":"); dataFile.print(timelog.minute(), DEC); dataFile.print(":"); dataFile.print(timelog.second(), DEC);
-    dataFile.print(",");
+    
+      //----------------------
+      // Attempt to get reading from loadcell, retry if failed
+      tension = loadcell.get_units(1);
+
+    //---------------------
+    // Get reading from RTC
+    timelog = rtc.now();
+
+  //--------------------
+    // Get BMP readings
+    bmptemp = bmp.readTemperature();
+    pressure = bmp.readPressure();
+    alt = bmp.readAltitude(sealevelpressure);
+  //--------------------
+    // Get gyro/accelerometer readings
+    sensors_event_t event;
+
+    /* Get the results (gyrocope values in rad/s) */
+    gyro.getEvent(&event);
+    angular_momentum = event.gyro;
+
+    /* Get the results (acceleration is measured in m/s^2) */
+    accel.getEvent(&event);
+    linear_acceleration = event.acceleration;
+
+    /* Get the results (magnetic vector values are in micro-Tesla (uT)) */
+    mag.getEvent(&event);
+    magnometer_measurement = event.magnetic;
 
 
-    //Tension Data
-    dataFile.print(tension);
-    dataFile.print(",");
-
-    //BMP Data
-    dataFile.print(bmptemp);
-    dataFile.print(",");
-    dataFile.print(pressure);
-    dataFile.print(",");
-    dataFile.print(alt);
-    dataFile.print(",");
-
-    // Gyro Data
-    dataFile.print(angular_momentum.x);
-    dataFile.print(",");
-    dataFile.print(angular_momentum.y);
-    dataFile.print(",");
-    dataFile.print(angular_momentum.z);
-    dataFile.print(",");
-
-    // Accelerometer Data
-    dataFile.print(linear_acceleration.x);
-    dataFile.print(",");
-    dataFile.print(linear_acceleration.y);
-    dataFile.print(",");
-    dataFile.print(linear_acceleration.z);
-    dataFile.print(",");
-
-    // Magnometer Data
-    dataFile.print(magnometer_measurement.x);
-    dataFile.print(",");
-    dataFile.print(magnometer_measurement.y);
-    dataFile.print(",");
-    dataFile.print(magnometer_measurement.z);
-    dataFile.print(",");
+  // ==========Writing Data==========
 
     
 
-    dataFile.println();
+    // If the file is available (meaning that it could open the file from the SD card), write to it:
+    if (dataFile) {
 
-    dataFile.close();
+      //Timestamp Data
+      dataFile.print(timelog.year(), DEC); dataFile.print("/"); dataFile.print(timelog.month(), DEC); dataFile.print("/"); dataFile.print(timelog.day(), DEC); dataFile.print("|"); 
+      dataFile.print(timelog.hour(), DEC); dataFile.print(":"); dataFile.print(timelog.minute(), DEC); dataFile.print(":"); dataFile.print(timelog.second(), DEC);
+      dataFile.print(",");
+
+
+      //Tension Data
+      dataFile.print(tension);
+      dataFile.print(",");
+
+      //BMP Data
+      dataFile.print(bmptemp);
+      dataFile.print(",");
+      dataFile.print(pressure);
+      dataFile.print(",");
+      dataFile.print(alt);
+      dataFile.print(",");
+
+      // Gyro Data
+      dataFile.print(angular_momentum.x);
+      dataFile.print(",");
+      dataFile.print(angular_momentum.y);
+      dataFile.print(",");
+      dataFile.print(angular_momentum.z);
+      dataFile.print(",");
+
+      // Accelerometer Data
+      dataFile.print(linear_acceleration.x);
+      dataFile.print(",");
+      dataFile.print(linear_acceleration.y);
+      dataFile.print(",");
+      dataFile.print(linear_acceleration.z);
+      dataFile.print(",");
+
+      // Magnometer Data
+      dataFile.print(magnometer_measurement.x);
+      dataFile.print(",");
+      dataFile.print(magnometer_measurement.y);
+      dataFile.print(",");
+      dataFile.print(magnometer_measurement.z);
+      dataFile.print(",");
+
+      
+
+      dataFile.println();
+
+    }
+    
+    else {
+      Serial.println("error opening datalog.txt");
+    }
   }
-  
-  else {
-    Serial.println("error opening datalog.txt");
-  }
+  dataFile.close();
   /*
 //==================Serial Monitoring============
     // Tension Data
