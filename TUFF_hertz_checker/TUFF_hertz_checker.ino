@@ -8,83 +8,116 @@
  * 
  ===========================================================================*/
 
-// Librariess
-#include <HX711.h>              // HX711 0.7.5 by Bogdan Necula
-#include <SPI.h>                // Built in
-#include <SD.h>                 // Built in
-#include <Wire.h>               // Built in
-#include <RTClib.h>             // RTClib 2.0.2 by Adafruit. NOTE: Dependent on BusIO 1.11.1 by Adafruit.
-#include <Adafruit_BMP280.h>    // BMP280 2.6.1 by Adafruit. NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit
+// Libraries
+#include <SPI.h>
+#include "SdFat.h"
+#include <SPI.h>                  // Built in
+#include <Wire.h>                 // Built in
+#include <HX711.h>                // HX711 0.7.5 by Bogdan Necula
+
+SdFat SD;
+
+const int chipSelect = 8;
+File experimentFile;
+File readableFile;
+
+struct datastore {
+  float tension;
+};
+
+float tension = 0;  // Tension sensor data
+int counter = 0;
+int total_Time;
+long millis_at_start;
+long last_Millis;
 
 
-// Declaring Objects
 HX711 loadcell;
-RTC_DS1307 rtc;
-
 
 // Wiring for the HX711 Amplifier
 const int LOADCELL_DOUT_PIN = 2;
 const int LOADCELL_SCK_PIN = 3;
 
-int counter = 0;
-DateTime timeLog;
-
-/*===========================================================================
- * Setup
- * Initialize the loadcell and prepare it for accurate readings.
- =========================================================================== */
+// Loadcell calibration values. Calibrated to our load cell particularly.
+// Offset - "zeroing the loadcell"
+// Divider - "converting amp readings to lbs"
+const long LOADCELL_OFFSET = 50682624;
+const long LOADCELL_DIVIDER = 27451.29667; 
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("BEGIN HERTZ CHECKER CODE");
+  Serial.begin(115200);
+  pinMode(10, OUTPUT);
+  // Initialize HX711 (load cell) with pinning/offsets/calibration
+  loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); 
+  loadcell.set_offset(LOADCELL_OFFSET);  
+  loadcell.set_scale(LOADCELL_DIVIDER);
 
-  // Declare LED as an output pin and turn it off
-  pinMode(LED_BUILTIN, OUTPUT); 
-  digitalWrite(LED_BUILTIN, LOW);
+  // Zero scale
+  loadcell.tare(10);
 
-  // Initialize HX711 with pinning.
-  loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
-
-  // Reset or "zero" loadcell readings.
-  loadcell.set_scale();
-  loadcell.tare();
-
-  // Wait for RTC to respond
-  if(!rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    Serial.flush();
-    while (1) delay(10);
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+    return;
   }
-
-  rtc.begin();
-
-  // Set RTC Date/Time
-  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-
-  timeLog = rtc.now();
-
-  // Visual indicator for setup completion
-  digitalWrite(LED_BUILTIN, HIGH);
-
+  // Remove these files if they happen to be here.
+  SD.remove("fastlogging.txt");
+  SD.remove("flightdata.txt");
+  experimentFile = SD.open("fastlogging.txt", FILE_WRITE);
+  last_Millis = millis_at_start = millis();
 }
 
-/*===========================================================================
- * Loop
- ===========================================================================*/
+
 void loop() {
-  if (timeLog == rtc.now()) {
-    hertz_code();
+  // Go for 1 second.
+  if (millis() - millis_at_start <= 5000) {
+    // EXPERIMENT: Store as much data as possible in 5 seconds.
+    // This part needs to be as fast as possible
+    struct datastore myData;
+    tension = loadcell.get_units(1);
+    myData.tension = tension;
+    Serial.print("myData.tension: ");
+    Serial.println(myData.tension); 
+
+  
+    experimentFile.write((const uint8_t *)&myData, sizeof(myData));
     counter++;
   }
+  // After 5 seconds, stop logging data
+  // For this part logging time isn't important as all data allready has been stored
   else {
-    Serial.print("Hertz rate: ");
-    Serial.println(counter);
-    timeLog = rtc.now();
-    counter = 0;
+    Serial.println("END DEBUGGING.");
+    total_Time = millis() - millis_at_start;
+    experimentFile.close();
+    experimentFile = SD.open("fastlogging.txt", FILE_READ);
+    
+
+    // Read data from "fastlogging.txt" and store it as CSV in "flightdata.txt"
+    if (experimentFile.available()) {
+      Serial.println("Reading experiment data...");
+      struct datastore myData;
+      readableFile = SD.open("flightdata.txt", FILE_WRITE);
+
+      for (int i = 0; i < counter; i++) {
+        experimentFile.read((uint8_t *)&myData, sizeof(myData));
+        readableFile.print("Tension: ");
+        readableFile.println(myData.tension);
+      }
+        Serial.println("Finished reading experiment data.");
+
+
+    }
+
+    Serial.println();
+    Serial.print("Total time: ");
+    Serial.println(total_Time);
+    Serial.println("Hertz:");
+    Serial.println(counter / 5);
+
+    experimentFile.close();
+    readableFile.close();
+
+    // Hang the program.
+    while (1);
   }
 }
 
-void hertz_code() {
-  /* Put loop code to test here */
-  
-}
