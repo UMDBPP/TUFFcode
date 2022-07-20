@@ -53,11 +53,11 @@ void setup() {
 
   // Reset or "zero" loadcell readings.
   loadcell.set_scale();
-  loadcell.tare();
+  loadcell.tare(10);
 
-  // Gives the load cell 5 seconds to ensure it finishes its startup
+  // Gives the load cell 1 second to ensure it finishes its startup
   Serial.println("Zeroing the load cell...");
-  delay(5000);
+  delay(1000);
   Serial.println("Load cell is zeroed and ready to go!");
 
   // Gives a visual indicator that the load cell is ready for calibration
