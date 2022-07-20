@@ -1,9 +1,8 @@
-# TUFF DOS
 <p align="center">
     <img src="https://user-images.githubusercontent.com/32310846/161163001-b1b6c3a0-91b8-45e9-89de-cac2818c7562.png"  width="500" />
 </p>
 
-
+# Launch: 7/30/2022
 Arduino code for _TUFF DOS_ payload for the Baloon Payload Program at the University of Maryland.
 
 Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
