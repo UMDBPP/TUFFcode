@@ -15,25 +15,10 @@
 #include <Adafruit_BMP280.h>      // BMP280 2.6.1 by Adafruit. 
                                   // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
 
-#include <Adafruit_10DOF.h>       // Adafruit 10DOF 1.1.1 by Adafruit
-
-#include <Adafruit_AHRS_FusionInterface.h>
-#include <Adafruit_AHRS_Madgwick.h>
-#include <Adafruit_AHRS_Mahony.h>
-#include <Adafruit_AHRS_NXPFusion.h>
-#include <Adafruit_AHRS.h>
-#include <Adafruit_Sensor_Set.h>
-#include <Adafruit_Simple_AHRS.h>   // Adafruit AHRS 2.3.2 by Adafruit
-
-#include <Adafruit_L3GD20_U.h>
-#include <Adafruit_L3GD20.h>        // Adafruit L3GD20 2.0.1 by Adafruit
-
-
-
-#include <Adafruit_LSM303_U.h>
-#include <Adafruit_LSM303.h>        // Adafruit LSM303DLHC 1.0.4
-
-
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
 
 
 // Misc Defining
@@ -44,9 +29,7 @@
 // Declaring Objects
 HX711 loadcell;
 RTC_DS1307 rtc;
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
-Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
-Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
+Adafruit_BNO055 bno = Adafruit_BNO055(55);
 Adafruit_BMP280 bmp;
 Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();
 Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();
@@ -71,9 +54,9 @@ DateTime timelog;   // Timestamp data
 float pressure = 0; // Measured in Pascals.
 float bmptemp = 0;  // Measured in degrees Celsius.
 float alt = 0;      // Measured in meters.
-sensors_vec_t angular_momentum;
-sensors_vec_t linear_acceleration;
-sensors_vec_t magnometer_measurement;
+sensors_vec_t abs_orientation;
+sensors_vec_t acceleration;
+sensors_vec_t magnometer;
 
 // Constant
 const float sealevelpressure = 1017.25; //hPa of local sea level pressure, I assume?
@@ -109,6 +92,16 @@ void setup() {
   // Zero scale
   loadcell.tare(10);
 
+  /* Initialise the Gyro/Accelerometer/Magnometer sensor */
+  if(!bno.begin())
+  {
+    /* There was a problem detecting the BNO055 ... check your connections */
+    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+  }
+  
+  delay(1000);
+    
+  bno.setExtCrystalUse(true);
 //--------------------------
 
   // Alert user if RTC fails to open.
@@ -135,22 +128,7 @@ void setup() {
   // Ensures the BMP sensor begins.
   bmp.begin();
 
-  /* Initialise the sensors */
-  if(!accel.begin())
-  {
-    /* There was a problem detecting the ADXL345 ... check your connections */
-    Serial.println(F("Ooops, no LSM303 detected ... Check your wiring!"));
-  }
-  if(!mag.begin())
-  {
-    /* There was a problem detecting the LSM303 ... check your connections */
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-  }
-  if(!gyro.begin())
-  {
-    /* There was a problem detecting the L3GD20 ... check your connections */
-    Serial.print("Ooops, no L3GD20 detected ... Check your wiring or I2C ADDR!");
-  }
+  
 
   Serial.print("START LOOP OF IN-FLIGHT CODE");
   //-------------------------
@@ -168,9 +146,9 @@ void loop() {
   for (i = 0; i < 10; i++) {
 
     
-      //----------------------
-      // Attempt to get reading from loadcell, retry if failed
-      tension = loadcell.get_units(1);
+    //----------------------
+    // Attempt to get reading from loadcell, retry if failed
+    tension = loadcell.get_units(1);
 
     //---------------------
     // Get reading from RTC
@@ -182,40 +160,64 @@ void loop() {
     pressure = bmp.readPressure();
     alt = bmp.readAltitude(sealevelpressure);
   //--------------------
-    // Get gyro/accelerometer readings
-    sensors_event_t event;
+  #if false
+    /* Get BNO sensor "event" (it's readings) */ 
+    sensors_event_t event; 
+    bno.getEvent(&event, Adafruit_BNO055::VECTOR_EULER);
+    abs_orientation = event.orientation;
+    
+    bno.getEvent(&event, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    acceleration = event.acceleration;
 
-    /* Get the results (gyrocope values in rad/s) */
-    gyro.getEvent(&event);
-    angular_momentum = event.gyro;
+    bno.getEvent(&event, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+    magnometer = event.magnetic;
 
-    /* Get the results (acceleration is measured in m/s^2) */
-    accel.getEvent(&event);
-    linear_acceleration = event.acceleration;
+    /* Display the floating point data */
+    Serial.print("gX: ");
+    Serial.print(abs_orientation.x, 4);
+    Serial.print("\tgY: ");
+    Serial.print(abs_orientation.y, 4);
+    Serial.print("\tgZ: ");
+    Serial.print(abs_orientation.z, 4);
+    Serial.println("");
 
-    /* Get the results (magnetic vector values are in micro-Tesla (uT)) */
-    mag.getEvent(&event);
-    magnometer_measurement = event.magnetic;
+    Serial.print("aX: ");
+    Serial.print(acceleration.x, 4);
+    Serial.print("\taY: ");
+    Serial.print(acceleration.y, 4);
+    Serial.print("\taZ: ");
+    Serial.print(acceleration.z, 4);
+    Serial.println("");
 
 
-  // ==========Writing Data==========
+    Serial.print("mX: ");
+    Serial.print(magnometer.x, 4);
+    Serial.print("\tmY: ");
+    Serial.print(magnometer.y, 4);
+    Serial.print("\tmZ: ");
+    Serial.print(magnometer.z, 4);
+    Serial.println("");
+
+    Serial.println("");
+    #endif
+    // ==========Writing Data==========
 
     
 
     // If the file is available (meaning that it could open the file from the SD card), write to it:
     if (dataFile) {
 
-      //Timestamp Data
+      // Timestamp Data
       dataFile.print(timelog.year(), DEC); dataFile.print("/"); dataFile.print(timelog.month(), DEC); dataFile.print("/"); dataFile.print(timelog.day(), DEC); dataFile.print("|"); 
       dataFile.print(timelog.hour(), DEC); dataFile.print(":"); dataFile.print(timelog.minute(), DEC); dataFile.print(":"); dataFile.print(timelog.second(), DEC);
       dataFile.print(",");
 
 
-      //Tension Data
+      // Tension Data
       dataFile.print(tension);
       dataFile.print(",");
 
-      //BMP Data
+      // BMP Data
       dataFile.print(bmptemp);
       dataFile.print(",");
       dataFile.print(pressure);
@@ -223,29 +225,30 @@ void loop() {
       dataFile.print(alt);
       dataFile.print(",");
 
-      // Gyro Data
-      dataFile.print(angular_momentum.x);
+/*
+      // BNO 9-Axis data
+      dataFile.print(abs_orientation.x);
       dataFile.print(",");
-      dataFile.print(angular_momentum.y);
+      dataFile.print(abs_orientation.y);
       dataFile.print(",");
-      dataFile.print(angular_momentum.z);
-      dataFile.print(",");
-
-      // Accelerometer Data
-      dataFile.print(linear_acceleration.x);
-      dataFile.print(",");
-      dataFile.print(linear_acceleration.y);
-      dataFile.print(",");
-      dataFile.print(linear_acceleration.z);
+      dataFile.print(abs_orientation.z);
       dataFile.print(",");
 
-      // Magnometer Data
-      dataFile.print(magnometer_measurement.x);
+      dataFile.print(acceleration.x);
       dataFile.print(",");
-      dataFile.print(magnometer_measurement.y);
+      dataFile.print(acceleration.y);
       dataFile.print(",");
-      dataFile.print(magnometer_measurement.z);
+      dataFile.print(acceleration.z);
       dataFile.print(",");
+
+      dataFile.print(magnometer.x);
+      dataFile.print(",");
+      dataFile.print(magnometer.y);
+      dataFile.print(",");
+      dataFile.print(magnometer.z);
+      dataFile.print(",");
+
+*/
 
       
 
@@ -254,15 +257,17 @@ void loop() {
     }
     
     else {
-      Serial.println("error opening datalog.txt");
+      //Serial.println("error opening datalog.txt");
     }
   }
   dataFile.close();
+  
   /*
 //==================Serial Monitoring============
     // Tension Data
     Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
     Serial.print(',');
-    Serial.println();    
-    */
+    Serial.println();   
+    */ 
+    
 }
