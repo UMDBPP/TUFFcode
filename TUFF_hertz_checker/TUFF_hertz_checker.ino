@@ -3,34 +3,19 @@
  * Hertz rate checker
  * By Jeremy Kuznetsov and Jaxon Lee
  * 
- * This gives the hertz rate of a particular block of code. 
- * Useful for debugging bottlenecks in sampling rate.
+ * This program tests the hertz rate of SDFat. It runs the SD card for 5 seconds
+ * and prints out how fast it was able to write.
  * 
  ===========================================================================*/
 
 // Libraries
-#include <SPI.h>
-#include "SdFat.h"
+#include "SdFat.h"                // SdFat 2.1.2 by Bill Greiman
 #include <SPI.h>                  // Built in
 #include <Wire.h>                 // Built in
 #include <HX711.h>                // HX711 0.7.5 by Bogdan Necula
 
+// SDFat's verion of SD object
 SdFat SD;
-
-const int chipSelect = 8;
-File experimentFile;
-File readableFile;
-
-struct datastore {
-  float tension;
-};
-
-float tension = 0;  // Tension sensor data
-int counter = 0;
-int total_Time;
-long millis_at_start;
-long last_Millis;
-
 
 HX711 loadcell;
 
@@ -44,9 +29,27 @@ const int LOADCELL_SCK_PIN = 3;
 const long LOADCELL_OFFSET = 50682624;
 const long LOADCELL_DIVIDER = 27451.29667; 
 
+
+const int chipSelect = 8;
+File experimentFile;
+File readableFile;
+
+struct datastore {
+  float tension;
+};
+
+float tension = 0;  // Tension sensor data
+int counter = 0;    // Number of readings
+int total_Time;     // Total run time
+long millis_at_start;
+
+
+
 void setup() {
+  // Initiliaze Arduino. Setting pin 10 to be an output pin is required.
   Serial.begin(115200);
   pinMode(10, OUTPUT);
+
   // Initialize HX711 (load cell) with pinning/offsets/calibration
   loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); 
   loadcell.set_offset(LOADCELL_OFFSET);  
@@ -55,20 +58,26 @@ void setup() {
   // Zero scale
   loadcell.tare(10);
 
-  if (!SD.begin(chipSelect)) {
-    Serial.println("Card failed, or not present");
-    return;
+  // Try opening SD card until it works (up to 10 times).
+  for (int i = 0; i < 10; i++){
+    if (SD.begin(chipSelect)) {
+      break;
+    }
+    else {
+      Serial.print("Card failed, or not present. Trying again...--");
+      Serial.println(i);
+    }
   }
-  // Remove these files if they happen to be here.
+
+  // Remove old data from experiment files.
   SD.remove("fastlogging.txt");
   SD.remove("flightdata.txt");
   experimentFile = SD.open("fastlogging.txt", FILE_WRITE);
-  last_Millis = millis_at_start = millis();
 }
 
 
 void loop() {
-  // Go for 1 second.
+  // Go for 5 seconds.
   if (millis() - millis_at_start <= 5000) {
     // EXPERIMENT: Store as much data as possible in 5 seconds.
     // This part needs to be as fast as possible
