@@ -53,7 +53,7 @@ void setup() {
 
   // Reset or "zero" loadcell readings.
   loadcell.set_scale();
-  loadcell.tare(10);
+  loadcell.tare(100);
 
   // Gives the load cell 1 second to ensure it finishes its startup
   Serial.println("Zeroing the load cell...");
