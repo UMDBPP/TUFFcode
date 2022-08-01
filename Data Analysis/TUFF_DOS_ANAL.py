@@ -5,7 +5,7 @@
 # data into a usable form. The second half analyzes the data.
 # Intial analysis--
 # Average HZ: 31.83
-# Ascent / Descent Tension:  ___ / ___
+# Ascent / Descent Tension:  4.84 lbs / 5.24 lbs
 # Everything below TUFF: ~5.22 lbs
 # Ascent Rate: 5.67 m/s
 #
@@ -101,6 +101,7 @@ read_file['Time'] = raw_seconds
 
 # In[197]:
 # Remove data spikes, referred to as "outliers".
+read_file.plot(x ='Time', y='Tension', kind = 'line')
 
 # Find outliers (values with a change of 4 lbs in 1/40th of a second)
 outliers = []
@@ -121,20 +122,15 @@ for outlier_index in outliers:
     # Ensure we don't go over the array size.
     if (outlier_index + i < len(read_file['Tension'].to_numpy())):
         read_file['Tension'][outlier_index] = read_file['Tension'][outlier_index + i]
-        
-read_file.plot(x ='Time', y='Tension', kind = 'line')
-plt.ylim(-10, 25)
-
-read_file.plot(x ='Time', y='Altitude', kind = 'line')
 
 # In[]
 # Find ascent rate. Use linear algebra and get "m" 
 # (gradient of line of best fit)
-df = read_file[150000:200000]
-df['ones']=1
-A = df[['Time','ones']]
-y = df['Altitude']
-m, c = np.linalg.lstsq(A,y)[0]
+#df = read_file[150000:200000]
+#df['ones']=1
+#A = df[['Time','ones']]
+#y = df['Altitude']
+#m, c = np.linalg.lstsq(A,y)[0]
 
 
 
@@ -152,10 +148,17 @@ new_df = read_file[93541:287140]
 # BEGIN DATA ANALYSIS
 # Tension, Altitude, and Temperature
 
-z = np.linspace(0, 10, 1000)
-new_df.plot(x ='Time', y={'Tension'}, kind = 'line')
-new_df.plot(x ='Time', y={'Altitude'}, kind = 'line')
-new_df.plot(x ='Time', y={'Temperature'}, kind = 'line')
+# Just Tension
+new_df.plot(x ='Time', y='Tension', kind = 'line')
+
+# Tension and altitude
+tension_plot = new_df.plot(x ='Time', y='Tension', kind = 'line')
+new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
+            secondary_y = True)
+
+# Temperature 
+new_df.plot(x ='Time', y='Temperature', kind = 'line')
+
 
 
 # In[238]:
@@ -195,7 +198,7 @@ y = new_df['Altitude'].to_numpy()
 # The index of the balloon pop.
 POP_POINT = 134546
 
-weight = 8.576236354
+weight = 5.22
 weight_array_a = np.full([POP_POINT], weight)
 weight_array_d = np.full([len(new_df) - POP_POINT], weight)
 array_of_ascent_tension = new_df[:POP_POINT]['Tension']
@@ -224,8 +227,11 @@ drag_plot = drag_df.plot(x = 'Time', y = 'Drag', kind = 'line')
 drag_df.plot(x ='Time', y='Altitude', kind = 'line', ax = drag_plot, secondary_y = True)
 
 # Put lines where jet stream begins and ends
-drag_plot.axvline(x = 2645.5, color = 'red', linestyle = 'dashed')
-drag_plot.axvline(x = 6027.818181818182, color = 'red', linestyle = 'dashed')
+time_8k = np.where(drag_df['Altitude'] > 8000)[0][0] + drag_df.index[0]
+time_15k = np.where(drag_df['Altitude'] > 15000)[0][0] + drag_df.index[0]
+
+drag_plot.axvline(x = drag_df['Time'][time_8k], color = 'red', linestyle = 'dashed')
+drag_plot.axvline(x = drag_df['Time'][time_15k], color = 'red', linestyle = 'dashed')
 
 # Find average drag at different points
 drag_df['Average_drag'] = new_df['Drag'].rolling(500).mean()
@@ -235,7 +241,7 @@ drag_plot = drag_df.plot(x = 'Time', y = 'Average_drag', kind = 'line')
 drag_df.plot(x ='Time', y='Altitude', kind = 'line', ax = drag_plot, secondary_y = True)
 
 # Put lines where jet stream begins and ends
-drag_plot.axvline(x = 2645.5, color = 'red', linestyle = 'dashed')
-drag_plot.axvline(x = 6027.818181818182, color = 'red', linestyle = 'dashed')
+drag_plot.axvline(x = drag_df['Time'][time_8k], color = 'red', linestyle = 'dashed')
+drag_plot.axvline(x = drag_df['Time'][time_15k], color = 'red', linestyle = 'dashed')
 
 # %%
