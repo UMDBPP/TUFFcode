@@ -15,7 +15,6 @@
 
 # In[110]:
 # Get everything set up
-
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -102,7 +101,6 @@ read_file['Time'] = raw_seconds
 # In[197]:
 # Remove data spikes, referred to as "outliers".
 read_file.plot(x ='Time', y='Tension', kind = 'line')
-
 # Find outliers (values with a change of 4 lbs in 1/40th of a second)
 outliers = []
 for index in read_file.index.values.tolist():
@@ -111,26 +109,17 @@ for index in read_file.index.values.tolist():
             > 4):
             outliers.append(index)
             
-
 # Remove outliers
 for outlier_index in outliers:
     i = 1
     # Find the nearest non-outlier.
     while ((outlier_index + i) in outliers):
         i += 1
-    
     # Ensure we don't go over the array size.
     if (outlier_index + i < len(read_file['Tension'].to_numpy())):
         read_file['Tension'][outlier_index] = read_file['Tension'][outlier_index + i]
 
-# In[]
-# Find ascent rate. Use linear algebra and get "m" 
-# (gradient of line of best fit)
-#df = read_file[150000:200000]
-#df['ones']=1
-#A = df[['Time','ones']]
-#y = df['Altitude']
-#m, c = np.linalg.lstsq(A,y)[0]
+
 
 
 
@@ -142,7 +131,7 @@ for outlier_index in outliers:
 
 new_df = read_file[93541:287140]
 
-
+# 88301 93547
 # In[274]:
 #---------------------------------
 # BEGIN DATA ANALYSIS
@@ -159,31 +148,80 @@ new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot,
 # Temperature 
 new_df.plot(x ='Time', y='Temperature', kind = 'line')
 
+# In[]:
+# Average Tension
 
+# Find average tension at different points
+new_df['Average_tension'] = new_df['Tension'].rolling(500).mean()
+
+# Plot average tension and altitude
+tension_plot = new_df.plot(x ='Time', y ='Average_tension', kind = 'line')
+new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
+            secondary_y = True)
+
+# In[]:
+# Gyro and Accelerometer
+# The data for angle x and angle z are essentially unreadable in this form.
+
+# The index of the balloon pop.
+POP_POINT = 134546
+
+start_index = new_df.index[0]
+accel_outliers = np.where(new_df['AccelerationZ'] == 0)[0]
+accel_outliers += start_index
+imu_df = new_df.copy()
+
+# Remove outliers
+imu_df.drop(accel_outliers, inplace = True)
+
+
+imu_df.plot(x = 'Time', y = 'AccelerationZ', kind = 'line')
+print("Average up/down acceleration: " + str(imu_df['AccelerationZ'][:POP_POINT].mean()))
 
 # In[238]:
-# Variance
-"""
-from scipy.io.wavfile import write
-from scipy.fft import fft, fftfreq
+# Fast Fourier Transformation
+# Applies a fast fourier transform to a slice of Tension data.
 
-N = 231615
-SAMPLE_RATE = 12
+from scipy.fft import rfft, rfftfreq
 
-yf = fft(np.array(read_file['Tension']))
-xf = fftfreq(N, 1 / SAMPLE_RATE)
+# Input the number of seconds you wish to test over and what the start time is.
+# Data starts around 2168 seconds.
+seconds = 20
+start_time = 4000
 
-write("TUFF_WAV.wav", SAMPLE_RATE, np.array(read_file['Tension']))
 
-plt.xlim((-0.002, 0.002))
+# Samples is seconds * average_hz.
+SAMPLES = seconds *  32
+
+# Find the index corresponding to the START_TIME
+START_INDEX = np.where(new_df['Time'] == start_time)[0][0]
+
+# Find the hertz rate of this slice
+time_array = new_df['Time'][START_INDEX:SAMPLES + START_INDEX].to_numpy()
+SAMPLE_RATE = len(time_array) / (time_array[-1] - time_array[0])
+SAMPLE_RATE = int(SAMPLE_RATE)  # Convert to int.
+
+# Apply real Fast Fourier Transform (real FFT) to the data. Take a slice of
+# data with "SAMPLES" number of data points. Zero the mean to improve
+# result quality.
+yf = rfft(np.array(new_df['Average_tension'][START_INDEX:SAMPLES + START_INDEX]
+                   -new_df['Average_tension'][START_INDEX:SAMPLES + START_INDEX]
+                   .mean()))
+xf = rfftfreq(SAMPLES, 1 / SAMPLE_RATE)
+
+
+plt.xlim((0, 3))
 plt.plot(xf, np.abs(yf))
 plt.show()
-"""
+
+# Analysis:
+# There seems to be a spike around 0.16 hz.
 
 # In[ ]:
-new_df['Variance2'] = new_df['Tension'].rolling(1000).var()
+# Variance
+new_df['Variance'] = new_df['Tension'].rolling(1000).var()
 
-variance_plot = new_df.plot(x ='Time', y='Variance2', kind = 'line')
+variance_plot = new_df.plot(x ='Time', y='Variance', kind = 'line')
 alt_plot = new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = variance_plot, secondary_y = True)
 
 variance_plot.set_ylabel('Variance')
@@ -192,11 +230,16 @@ alt_plot.set_ylabel('Altitude')
 x = new_df['Time'].to_numpy()
 y = new_df['Altitude'].to_numpy()
 
+# 3 Spikes: 
+# 1. 16499.35 km at index 195534 (5158 seconds)
+# 2. 17563.90 km at index 201939 (5371.8 seconds)
+# 3. 20919.24 km at index 134544 (6272.5 seconds)
+
+# The 3rd spike is probably the balloon pop at max altitude.
 
 # In[ ]:
 
-# The index of the balloon pop.
-POP_POINT = 134546
+
 
 weight = 5.22
 weight_array_a = np.full([POP_POINT], weight)
@@ -243,5 +286,25 @@ drag_df.plot(x ='Time', y='Altitude', kind = 'line', ax = drag_plot, secondary_y
 # Put lines where jet stream begins and ends
 drag_plot.axvline(x = drag_df['Time'][time_8k], color = 'red', linestyle = 'dashed')
 drag_plot.axvline(x = drag_df['Time'][time_15k], color = 'red', linestyle = 'dashed')
+
+
+# In[]
+# Find ascent rate. Use linear algebra and get "m" 
+# (gradient of line ot fit)f bes
+ascent_df = new_df[:21706]
+ascent_df['ones']=1
+A = ascent_df[['Time','ones']]
+y = ascent_df['Altitude']
+m, c = np.linalg.lstsq(A,y)[0]
+
+print("Ascent rate: " + str(m))
+
+descent_df = new_df[180578:]
+descent_df['ones']=1
+A = descent_df[['Time','ones']]
+y = descent_df['Altitude']
+m, c = np.linalg.lstsq(A,y)[0]
+
+print("Descent rate: " + str(m))
 
 # %%

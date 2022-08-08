@@ -176,6 +176,19 @@ new_df.plot(x ='Time', y={'Tension'}, kind = 'line')
 new_df.plot(x ='Time', y={'Altitude'}, kind = 'line')
 new_df.plot(x ='Time', y={'Temperature'}, kind = 'line')
 
+tension_plot = new_df.plot(x ='Time', y='Tension', kind = 'line')
+new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
+            secondary_y = True)
+
+# In[]:
+# Average Tension
+# Find average tension at different points
+new_df['Average_tension'] = new_df['Tension'].rolling(500).mean()
+
+# Plot average tension and altitude
+tension_plot = new_df.plot(x ='Time', y='Average_tension', kind = 'line')
+new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
+            secondary_y = True)
 
 # In[238]:
 # Variance
