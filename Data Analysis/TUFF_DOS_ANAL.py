@@ -12,9 +12,9 @@
 # Code written by Oliver Villegas and Jaxon Lee.
 
 
-
 # In[110]:
 # Get everything set up
+from telnetlib import Telnet
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -53,12 +53,12 @@ for time in new_times:
     sliced = time[(time.find(":") + 1):]
     minutes = int(sliced[:(sliced.find(":"))])
     sliced = sliced[(sliced.find(":") + 1):]
-    seconds = int(sliced)
+    SECONDS = int(sliced)
     
     # Subtract the first seconds value from all seconds readings.
     if ('offset' not in locals()):
-        offset = (3600 * hours) + (60 * minutes) + seconds
-    raw_sec = ((3600 * hours) + (60 * minutes) + seconds) - offset
+        offset = (3600 * hours) + (60 * minutes) + SECONDS
+    raw_sec = ((3600 * hours) + (60 * minutes) + SECONDS) - offset
         
     
     raw_seconds.append(raw_sec)
@@ -131,7 +131,6 @@ for outlier_index in outliers:
 
 new_df = read_file[93541:287140]
 
-# 88301 93547
 # In[274]:
 #---------------------------------
 # BEGIN DATA ANALYSIS
@@ -176,70 +175,13 @@ imu_df.drop(accel_outliers, inplace = True)
 
 
 imu_df.plot(x = 'Time', y = 'AccelerationZ', kind = 'line')
-print("Average up/down acceleration: " + str(imu_df['AccelerationZ'][:POP_POINT].mean()))
+print("Average up/down acceleration: " + str(imu_df['AccelerationZ'][:83908].mean()))
 
-# In[238]:
-# Fast Fourier Transformation
-# Applies a fast fourier transform to a slice of Tension data.
-
-from scipy.fft import rfft, rfftfreq
-
-# Input the number of seconds you wish to test over and what the start time is.
-# Data starts around 2168 seconds.
-seconds = 20
-start_time = 4000
-
-
-# Samples is seconds * average_hz.
-SAMPLES = seconds *  32
-
-# Find the index corresponding to the START_TIME
-START_INDEX = np.where(new_df['Time'] == start_time)[0][0]
-
-# Find the hertz rate of this slice
-time_array = new_df['Time'][START_INDEX:SAMPLES + START_INDEX].to_numpy()
-SAMPLE_RATE = len(time_array) / (time_array[-1] - time_array[0])
-SAMPLE_RATE = int(SAMPLE_RATE)  # Convert to int.
-
-# Apply real Fast Fourier Transform (real FFT) to the data. Take a slice of
-# data with "SAMPLES" number of data points. Zero the mean to improve
-# result quality.
-yf = rfft(np.array(new_df['Average_tension'][START_INDEX:SAMPLES + START_INDEX]
-                   -new_df['Average_tension'][START_INDEX:SAMPLES + START_INDEX]
-                   .mean()))
-xf = rfftfreq(SAMPLES, 1 / SAMPLE_RATE)
-
-
-plt.xlim((0, 3))
-plt.plot(xf, np.abs(yf))
-plt.show()
-
-# Analysis:
-# There seems to be a spike around 0.16 hz.
+imu_df['Average_accelerationZ'] = imu_df['AccelerationZ'].rolling(500).mean()
+imu_df.plot(x = 'Time', y = 'Average_accelerationZ', kind = 'line')
 
 # In[ ]:
-# Variance
-new_df['Variance'] = new_df['Tension'].rolling(1000).var()
-
-variance_plot = new_df.plot(x ='Time', y='Variance', kind = 'line')
-alt_plot = new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = variance_plot, secondary_y = True)
-
-variance_plot.set_ylabel('Variance')
-alt_plot.set_ylabel('Altitude')
-
-x = new_df['Time'].to_numpy()
-y = new_df['Altitude'].to_numpy()
-
-# 3 Spikes: 
-# 1. 16499.35 km at index 195534 (5158 seconds)
-# 2. 17563.90 km at index 201939 (5371.8 seconds)
-# 3. 20919.24 km at index 134544 (6272.5 seconds)
-
-# The 3rd spike is probably the balloon pop at max altitude.
-
-# In[ ]:
-
-
+# Calculate drag
 
 weight = 5.22
 weight_array_a = np.full([POP_POINT], weight)
@@ -263,6 +205,8 @@ FINAL_DATA = new_df
 new_df.to_csv('CSV_TUFF_DOS.CSV', index='Time')
 
 # In[ ]:
+# Calculate average drag
+
 drag_df = new_df
 
 # Plot drag against altitude
@@ -289,9 +233,33 @@ drag_plot.axvline(x = drag_df['Time'][time_15k], color = 'red', linestyle = 'das
 
 
 # In[]
+# Modified tension
+
+# Correct for potential erroneous loadcell divider.
+new_df['Tension'] *= 1.3507
+tension_plot = new_df.plot(x ='Time', y='Tension', kind = 'line')
+new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
+            secondary_y = True)
+
+
+# In[]:
+# Find ascent/descent tension (below 10,000 ft)
+
+# Get tensions above 10,000 ft (convert m to ft)
+above_10k_ft = np.where(new_df['Altitude'] >= 10000 * 0.3048)[0]
+first_10k = above_10k_ft[0]
+second_10k = above_10k_ft[-1]
+
+ascent_tension = new_df['Tension'][1000:first_10k].mean()
+descent_tension = new_df['Tension'][second_10k:-1000].mean()
+
+print("Ascent tension: " + str(ascent_tension))
+print("Descent tension: " + str(descent_tension))
+
+# In[]
 # Find ascent rate. Use linear algebra and get "m" 
 # (gradient of line ot fit)f bes
-ascent_df = new_df[:21706]
+ascent_df = new_df[1000:first_10k]
 ascent_df['ones']=1
 A = ascent_df[['Time','ones']]
 y = ascent_df['Altitude']
@@ -299,7 +267,7 @@ m, c = np.linalg.lstsq(A,y)[0]
 
 print("Ascent rate: " + str(m))
 
-descent_df = new_df[180578:]
+descent_df = new_df[second_10k:-1000]
 descent_df['ones']=1
 A = descent_df[['Time','ones']]
 y = descent_df['Altitude']
@@ -307,4 +275,66 @@ m, c = np.linalg.lstsq(A,y)[0]
 
 print("Descent rate: " + str(m))
 
-# %%
+
+# In[238]:
+# Fast Fourier Transformation
+# Applies a fast fourier transform to a slice of Tension data.
+# This helps measure payload oscillations in hertz.
+
+from scipy.fft import rfft, rfftfreq
+
+# Input the number of seconds you wish to test over and what the start time is.
+# Data starts around 2168 seconds.
+SECONDS = 30
+START_TIME = 3700
+
+
+# Samples is seconds * average_hz.
+samples = SECONDS *  32
+
+# Find the index corresponding to the START_TIME
+start_index = np.where(new_df['Time'] == START_TIME)[0][0]
+
+# Find the hertz rate of this slice
+time_array = new_df['Time'][start_index:samples + start_index].to_numpy()
+sample_rate = len(time_array) / (time_array[-1] - time_array[0])
+sample_rate = int(sample_rate)  # Convert to int.
+
+# Apply real Fast Fourier Transform (real FFT) to the data. Take a slice of
+# data with "SAMPLES" number of data points. Zero the mean to improve
+# result quality.
+yf = rfft(np.array(new_df['Tension'][start_index:samples + start_index]
+                   -new_df['Tension'][start_index:samples + start_index]
+                   .mean()))
+xf = rfftfreq(samples, 1 / sample_rate)
+
+
+plt.xlim((0, 3))
+plt.plot(xf, np.abs(yf))
+plt.show()
+
+# Analysis:
+# There seems to be a spike around 0.16 hz and a smaller spike around 0.64 hz.
+
+# In[ ]:
+# Variance
+# This may tell us jetstream altitude locations. 
+# Keep an eye on the "spikes" in tension variance.
+
+new_df['Variance'] = new_df['Tension'].rolling(1000).var()
+
+variance_plot = new_df.plot(x ='Time', y='Variance', kind = 'line')
+alt_plot = new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = variance_plot, secondary_y = True)
+
+variance_plot.set_ylabel('Variance')
+alt_plot.set_ylabel('Altitude')
+
+x = new_df['Time'].to_numpy()
+y = new_df['Altitude'].to_numpy()
+
+# 3 Spikes: 
+# 1. 16499.35 km at index 195534 (5158 seconds)
+# 2. 17563.90 km at index 201939 (5371.8 seconds)
+# 3. 20919.24 km at index 134544 (6272.5 seconds)
+
+# The 3rd spike is probably the balloon pop at max altitude.
