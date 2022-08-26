@@ -9,6 +9,27 @@
 # Everything below TUFF: ~5.22 lbs
 # Ascent Rate: 5.67 m/s
 #
+# Conclusions:
+# 1. Drag:
+# INCONCLUSIVE [See drag graph]
+#   - All measurents seem 23% lower than expected
+#       - When accounting for this error, measurements are within 0.2 lbs
+#   - Multiple oddities in data
+#       - Tension decreases until ~4243 seconds, then incraeses again
+#       - Descent tension is higher than ascent tension
+#       - Period of unusual quietness after 17.5 km
+#     Theory: Steady deceleration in ascent rate causes tension to decrease
+#
+# 2. Oscillations:
+# SUCCESS [see Fast Fourier Transform graph]
+#   - Clear oscillation of ~0.16 hz
+#   - Potential oscillation at ~0.64 hz
+#   - Further analysis required (what is oscillating at 0.16 hz?)
+#
+# 3. Jet Stream:
+# SUCCESS [see Variance graph]
+#   - Clear spikes at 16.5 km and 17.5 km
+#
 # Code written by Oliver Villegas and Jaxon Lee.
 
 
@@ -235,11 +256,11 @@ drag_plot.axvline(x = drag_df['Time'][time_15k], color = 'red', linestyle = 'das
 # In[]
 # Modified tension
 
-# Correct for potential erroneous loadcell divider.
-new_df['Tension'] *= 1.3507
-tension_plot = new_df.plot(x ='Time', y='Tension', kind = 'line')
-new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
-            secondary_y = True)
+# Correct for potential erroneous loadcell divider. Optimal: 32.70%
+#new_df['Tension'] *= 1.3270
+#tension_plot = new_df.plot(x ='Time', y='Tension', kind = 'line')
+#new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
+#            secondary_y = True)
 
 
 # In[]:
@@ -259,16 +280,16 @@ print("Descent tension: " + str(descent_tension))
 # In[]
 # Find ascent rate. Use linear algebra and get "m" 
 # (gradient of line ot fit)f bes
-ascent_df = new_df[1000:first_10k]
-ascent_df['ones']=1
+ascent_df = new_df[1500:first_10k].copy()
+ascent_df['ones'] = 1
 A = ascent_df[['Time','ones']]
 y = ascent_df['Altitude']
 m, c = np.linalg.lstsq(A,y)[0]
 
 print("Ascent rate: " + str(m))
 
-descent_df = new_df[second_10k:-1000]
-descent_df['ones']=1
+descent_df = new_df[second_10k:-1000].copy()
+descent_df['ones'] = 1
 A = descent_df[['Time','ones']]
 y = descent_df['Altitude']
 m, c = np.linalg.lstsq(A,y)[0]
@@ -333,8 +354,8 @@ x = new_df['Time'].to_numpy()
 y = new_df['Altitude'].to_numpy()
 
 # 3 Spikes: 
-# 1. 16499.35 km at index 195534 (5158 seconds)
-# 2. 17563.90 km at index 201939 (5371.8 seconds)
-# 3. 20919.24 km at index 134544 (6272.5 seconds)
+# 1. 16499.35 m at index 195534 (5158 seconds)
+# 2. 17563.90 m at index 201939 (5371.8 seconds)
+# 3. 20919.24 m at index 134544 (6272.5 seconds)
 
 # The 3rd spike is probably the balloon pop at max altitude.
