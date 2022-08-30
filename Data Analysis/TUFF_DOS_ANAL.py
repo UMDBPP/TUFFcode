@@ -196,7 +196,8 @@ imu_df.drop(accel_outliers, inplace = True)
 
 
 imu_df.plot(x = 'Time', y = 'AccelerationZ', kind = 'line')
-print("Average up/down acceleration: " + str(imu_df['AccelerationZ'][:83908].mean()))
+print("Average up acceleration: " + str(imu_df['AccelerationZ'][:83908].mean()))
+print("Average down acceleration: " + str(imu_df['AccelerationZ'][-3000:-500].mean()))
 
 imu_df['Average_accelerationZ'] = imu_df['AccelerationZ'].rolling(500).mean()
 imu_df.plot(x = 'Time', y = 'Average_accelerationZ', kind = 'line')
@@ -278,6 +279,14 @@ print("Ascent tension: " + str(ascent_tension))
 print("Descent tension: " + str(descent_tension))
 
 # In[]
+
+# First parameter is x, second parameter is y, and third parameter is degree
+#fit = np.polyfit(new_df['Time'][:POP_POINT], new_df['Altitude'][:POP_POINT], 2)
+#equation = np.poly1d(fit)
+#print ("The fit coefficients are a = {0:.4f}, b = {1:.4f} c = {2:.4f}".format(*fit))
+#print (equation)
+
+# In[]
 # Find ascent rate. Use linear algebra and get "m" 
 # (gradient of line ot fit)f bes
 ascent_df = new_df[1500:first_10k].copy()
@@ -306,8 +315,8 @@ from scipy.fft import rfft, rfftfreq
 
 # Input the number of seconds you wish to test over and what the start time is.
 # Data starts around 2168 seconds.
-SECONDS = 30
-START_TIME = 3700
+SECONDS = 60
+START_TIME = 4000
 
 
 # Samples is seconds * average_hz.
