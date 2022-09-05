@@ -35,7 +35,6 @@
 
 # In[110]:
 # Get everything set up
-from telnetlib import Telnet
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
