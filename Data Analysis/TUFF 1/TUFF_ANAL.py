@@ -3,7 +3,6 @@
 
 # In[110]:
 
-from curses.ascii import alt
 from matplotlib import pyplot as plt
 import matplotlib
 import numpy as np
@@ -172,7 +171,8 @@ new_df = read_file[15500:80000]
 # Tension, Altitude, and Temperature
 
 z = np.linspace(0, 10, 1000)
-new_df.plot(x ='Time', y={'Tension'}, kind = 'line')
+new_df.plot(x ='Time', y={'Tension'}, kind = 'line', title = 'Time vs. Tension', 
+            xlabel = 'Time (seconds)', ylabel = 'Tension (lbs)')
 new_df.plot(x ='Time', y={'Altitude'}, kind = 'line')
 new_df.plot(x ='Time', y={'Temperature'}, kind = 'line')
 
