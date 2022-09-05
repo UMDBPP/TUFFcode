@@ -9,8 +9,6 @@ Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
 
 -------
 
-[Picture of TUFF Dos]
-
 ## Quickstart 🚀
 ```
 sudo snap install arduino
@@ -35,6 +33,10 @@ Note: Run TUFF_calibration with its experiment procedure for more accurate readi
 - 16 GB SD Card
 - SD Card Reader
 - 9 Volt battery
+
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/32310846/188052753-d0e78f5d-4c42-4c82-abd4-9912e4d3c57b.jpg"  width="1500" />
+</p>
 
 # Preceeding Flights ⏪
 - TUFF 105          Nov 14,     2021
