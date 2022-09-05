@@ -166,6 +166,7 @@ read_file.plot(x ='Time', y='Tension', kind = 'line')
 
 new_df = read_file[15500:80000]
 
+new_df.to_csv(SAVE_TO, index='Time')
 
 # In[274]:
 # Tension, Altitude, and Temperature
