@@ -52,9 +52,23 @@ tuff_110_df['Average_tension'] = tuff_110_df['Tension'].rolling(1000).mean()
 tuff_110_df.plot(x ='Time', y='Average_tension', kind = 'line', xlabel = 'Time (seconds)', 
                  ax = tension_plot, color = 'red')
 
+tension_plot = tuff_110_df.plot(x = 'Time', y = 'Average_tension', kind = 'line', 
+                 title = 'Time vs. Average Tension and Altitude', color = 'red')
+alt_plot = tuff_110_df.plot(x ='Time', y='Altitude', kind = 'line', xlabel = 'Time (seconds)', 
+                 ax = tension_plot, secondary_y = True, color = 'orange')
+
+tension_plot.set_ylabel('Average Tension (lbs)')
+alt_plot.set_ylabel('Altitude (ft)')
+
+
 #In[]:
 # ----------- Basic Stats -----------
 # The ascent and descent rate of TUFF 110.
+range = tuff_110_df['Time'].max() - tuff_110_df['Time'].min()
+print("Data range: " + str(range))
+
+min_temp = tuff_110_df['Temperature'].min()
+print("Minimum Temperature: " + str(min_temp))
 
 # Get tensions above 10,000 ft
 above_10k_ft = np.where(tuff_110_df['Altitude'] >= 10000)[0]
@@ -186,6 +200,14 @@ tuff_dos_df.plot(x ='Time', y='Altitude', kind = 'line', ax = myPlot,
 
 # ----------- Basic Stats -----------
 # The ascent and descent rate of TUFF DOS.
+
+range = tuff_dos_df['Time'].max() - tuff_dos_df['Time'].min()
+print("Data range: " + str(range))
+
+min_temp = tuff_dos_df['Temperature'].min()
+print("Minimum Temperature: " + str(min_temp))
+
+
 POP_POINT_DOS = 134546 # np.where(tuff_dos_df['Altitude'] == tuff_dos_df['Altitude'].max())[0][0] + 
 
 
@@ -216,7 +238,77 @@ print("Descent rate: " + str(m))
 #In[]:
 # ----------- Oscillations -----------
 # The oscillation rate of the Axient Payload, the one below TUFF DOS.
+# In[238]:
+# Fast Fourier Transformation
+# Applies a fast fourier transform to a slice of Tension data.
+# This helps measure payload oscillations in hertz.
+
+from scipy.fft import rfft, rfftfreq
+
+# Input the number of seconds you wish to test over and what the start time is.
+# Data starts around 2168 seconds.
+SECONDS = 60
+START_TIME = 4000
+
+
+# Samples is seconds * average_hz.
+samples = SECONDS *  32
+
+# Find the index corresponding to the START_TIME
+start_index = np.where(tuff_dos_df['Time'] == START_TIME)[0][0]
+
+# Find the hertz rate of this slice
+time_array = tuff_dos_df['Time'][start_index:samples + start_index].to_numpy()
+sample_rate = len(time_array) / (time_array[-1] - time_array[0])
+sample_rate = int(sample_rate)  # Convert to int.
+
+# Apply real Fast Fourier Transform (real FFT) to the data. Take a slice of
+# data with "SAMPLES" number of data points. Zero the mean to improve
+# result quality.
+yf = rfft(np.array(tuff_dos_df['Tension'][start_index:samples + start_index]
+                   -tuff_dos_df['Tension'][start_index:samples + start_index]
+                   .mean()))
+xf = rfftfreq(samples, 1 / sample_rate)
+
+
+
+plt.xlim((0, 1))
+plt.plot(xf, np.abs(yf))
+#plt.plot([0.135, 0.135], [-50, 400], 'k-', lw=2, color = 'red')
+plt.xlabel('Frequency (hz)')
+plt.ylabel('Intensity')
+plt.title('Fast Fourier Transform Graph')
+plt.show()
+
+
+
+# Analysis:
+# There seems to be a spike around 0.16 hz and a smaller spike around 0.64 hz.
+
 
 #In[]:
 # ----------- Variance -----------
 # The variance of the tension data during the TUFF DOS launch
+
+# Variance
+# This may tell us jetstream altitude locations. 
+# Keep an eye on the "spikes" in tension variance.
+
+tuff_dos_df['Variance'] = tuff_dos_df['Tension'].rolling(1000).var()
+
+variance_plot = tuff_dos_df.plot(x ='Time', y='Variance', kind = 'line', 
+                                 title = 'Time vs Variance and Altitude')
+alt_plot = tuff_dos_df.plot(x ='Time', y='Altitude', kind = 'line', ax = variance_plot, secondary_y = True)
+
+variance_plot.set_ylabel('Variance')
+alt_plot.set_ylabel('Altitude')
+
+x = tuff_dos_df['Time'].to_numpy()
+y = tuff_dos_df['Altitude'].to_numpy()
+
+# 3 Spikes: 
+# 1. 16499.35 m at index 195534 (5158 seconds)
+# 2. 17563.90 m at index 201939 (5371.8 seconds)
+# 3. 20919.24 m at index 134544 (6272.5 seconds)
+
+# The 3rd spike is probably the balloon pop at max altitude.

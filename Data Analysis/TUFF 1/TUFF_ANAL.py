@@ -4,14 +4,11 @@
 # In[110]:
 
 from matplotlib import pyplot as plt
-import matplotlib
 import numpy as np
-import math
-import csv
 import pandas as pd
 
-SAVE_TO = 'CSV_TUFF.CSV'
-OG = 'TUFF_DATA.TXT'
+SAVE_TO = 'CSV_TUFF_105.CSV'
+OG = 'TUFF_DATA105.TXT'
 TIME_ONLY = 'TIME_ONLY.CSV'
 
 plt.rcParams["figure.figsize"] = [7.50, 3.50]
