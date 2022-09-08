@@ -40,9 +40,17 @@ tuff_dos_df['Altitude'] *= 3.28084
 
 # Graph Time vs. Tension
 tension_plot = tuff_110_df.plot(x = 'Time', y = 'Tension', kind = 'line', 
-                 title = 'Time vs. Tension and Altitude', ylabel = 'Tension (lbs)')
-tuff_110_df.plot(x ='Time', y='Altitude', kind = 'line', xlabel = 'Time (seconds)', 
+                 title = 'Time vs. Tension and Altitude')
+alt_plot = tuff_110_df.plot(x ='Time', y='Altitude', kind = 'line', xlabel = 'Time (seconds)', 
                  ax = tension_plot, secondary_y = True)
+
+tension_plot.set_ylabel('Tension (lbs)')
+alt_plot.set_ylabel('Altitude (ft)')
+
+# Add red line
+tuff_110_df['Average_tension'] = tuff_110_df['Tension'].rolling(1000).mean()
+tuff_110_df.plot(x ='Time', y='Average_tension', kind = 'line', xlabel = 'Time (seconds)', 
+                 ax = tension_plot, color = 'red')
 
 #In[]:
 # ----------- Basic Stats -----------
