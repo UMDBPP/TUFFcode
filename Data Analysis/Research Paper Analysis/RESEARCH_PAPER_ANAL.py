@@ -279,7 +279,7 @@ plt.plot(xf, np.abs(yf))
 #plt.plot([0.135, 0.135], [-50, 400], 'k-', lw=2, color = 'red')
 plt.xlabel('Frequency (hz)')
 plt.ylabel('Intensity')
-plt.title('Fast Fourier Transform Graph')
+plt.title('Fast Fourier transform of tension from the time space to the frequency space ')
 plt.show()
 
 
@@ -298,12 +298,14 @@ plt.show()
 
 tuff_dos_df['Variance'] = tuff_dos_df['Tension'].rolling(1000).var()
 
-variance_plot = tuff_dos_df.plot(x ='Time', y='Variance', kind = 'line', 
-                                 title = 'Time vs Variance and Altitude')
-alt_plot = tuff_dos_df.plot(x ='Time', y='Altitude', kind = 'line', ax = variance_plot, secondary_y = True)
+variance_plot = tuff_dos_df.plot(x ='Time', y='Variance', kind = 'line',
+                                 title = 'Variance and Altitude vs Time')
+alt_plot = tuff_dos_df.plot(x ='Time', y='Altitude', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = variance_plot, 
+                            secondary_y = True)
 
-variance_plot.set_ylabel('Variance')
-alt_plot.set_ylabel('Altitude')
+variance_plot.set_ylabel('Variance (lbs^2)')
+alt_plot.set_ylabel('Altitude (ft)')
 
 x = tuff_dos_df['Time'].to_numpy()
 y = tuff_dos_df['Altitude'].to_numpy()
@@ -314,3 +316,5 @@ y = tuff_dos_df['Altitude'].to_numpy()
 # 3. 20919.24 m at index 134544 (6272.5 seconds)
 
 # The 3rd spike is probably the balloon pop at max altitude.
+
+# %%
