@@ -118,8 +118,10 @@ drag = np.concatenate((array_of_ascent_tension, array_of_descent_tension))
 tuff_110_df['Drag'] = drag
 
 tuff_110_df.plot(x = 'Time', y = 'Drag', kind = 'line')
-tuff_110_df['Average_drag'] = tuff_110_df['Drag'].rolling(1000).mean()
-tuff_110_df.plot(x = 'Time', y = 'Average_drag', kind = 'line')
+tuff_110_df['Average Drag'] = tuff_110_df['Drag'].rolling(1000).mean()
+tuff_110_df.plot(x = 'Time', y = 'Average Drag', kind = 'line', 
+                 xlabel = 'Time (seconds)', ylabel = 'Average Drag (lbs)', 
+                 title = 'Average Drag vs Time')
 
 
 #In[]:

@@ -35,20 +35,11 @@ read_file.to_csv(SAVE_TO, index='Time')
 # In[113]:
 
 
-csv_file = open('CSV_TUFF.csv')
+csv_file = open('CSV_TUFF_105.csv')
 
 extract = ['Time']
-dataframe = pd.read_csv("CSV_TUFF.csv", usecols=extract, dtype={"Time":"string"})
+dataframe = pd.read_csv("CSV_TUFF_105.csv", usecols=extract, dtype={"Time":"string"})
 dataframe.to_csv('TIME_ONLY.CSV', index='Time')
-
-#print(dataframe)
-
-
-# In[114]:
-
-
-#print(dataframe.dtypes)
-
 
 # In[130]:
 
@@ -60,12 +51,6 @@ np_time = dataframe['Time'].to_numpy()
 
 for time in np_time:
     new_times.append(time[(time.find("|") + 1):])
-
-
-# In[132]:
-
-
-#print(new_times)
 
 
 # In[183]:
@@ -80,7 +65,10 @@ for time in new_times:
     sliced = sliced[(sliced.find(":") + 1):]
     seconds = int(sliced)
     
-    raw_sec = ((3600 * hours) + (60 * minutes) + seconds) - 36776
+        # Subtract the first seconds value from all seconds readings.
+    if ('offset' not in locals()):
+        offset = (3600 * hours) + (60 * minutes) + seconds
+    raw_sec = ((3600 * hours) + (60 * minutes) + seconds) - offset
         
     
     raw_seconds.append(raw_sec)
@@ -161,7 +149,8 @@ read_file.plot(x ='Time', y='Tension', kind = 'line')
 # In[265]:
 # Get rid of junk values from before and after launch
 
-new_df = read_file[15500:80000]
+new_df = read_file
+#new_df = read_file[15500:80000]  # TUFF 110
 
 new_df.to_csv(SAVE_TO, index='Time')
 
