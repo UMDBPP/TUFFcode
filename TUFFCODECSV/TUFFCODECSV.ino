@@ -46,7 +46,7 @@ const int LOADCELL_SCK_PIN = 3;
 // Offset - "zeroing the loadcell"
 // Divider - "converting amp readings to lbs"
 const long LOADCELL_OFFSET = 50682624;
-const long LOADCELL_DIVIDER = 27451.29667; 
+const long LOADCELL_DIVIDER = 169570.1038; 
 
 // Variables
 float tension = 0;  // Tension sensor data
