@@ -2,7 +2,7 @@
     <img src="https://user-images.githubusercontent.com/32310846/161163001-b1b6c3a0-91b8-45e9-89de-cac2818c7562.png"  width="500" />
 </p>
 
-# Launch: 7/31/2022 🎈
+# Launch: 10/16/2022 🎈
 Arduino code for _TUFF DOS_ payload for the Baloon Payload Program at the University of Maryland. The payload reads tension data from the rope in atmospheric balloon launchs (>30,000 ft).
 
 Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
@@ -40,5 +40,7 @@ Note: Run TUFF_calibration with its experiment procedure for more accurate readi
 
 # Preceeding Flights ⏪
 - TUFF 105          Nov 14,     2021
-- TUFF 110          March 5,    2022
+- TUFF 110          Mar 5,      2022
+- TUFF DOS 111      July 31,    2022
+- TUFF DOS 112      Oct 16,     2022
 
