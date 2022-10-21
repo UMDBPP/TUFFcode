@@ -3,7 +3,7 @@
 </p>
 
 # Launch: 10/16/2022 🎈
-Arduino code for _TUFF DOS_ payload for the Baloon Payload Program at the University of Maryland. The payload reads tension data from the rope in atmospheric balloon launchs (>30,000 ft).
+Arduino code for _TUFF DOS_ payload for the Baloon Payload Program at the University of Maryland. The payload reads tension data from the rope in atmospheric balloon launchs (>50,000 ft).
 
 Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
 
@@ -22,6 +22,18 @@ OR...
 5. You're ready to launch!
 
 Note: Run TUFF_calibration with its experiment procedure for more accurate readings
+
+
+## Code Structure 📁
+The code is broken up as follows:
+
+- 📁`Data Analysis`: Python Juypter Notebook analysis of TUFF data
+    - 📁`Data`: All data collected across our 4 flights. Includes formatted and unformatted data
+    - 🏃`*.py`: Files with analysis. Run them to see graphs of our data 
+- 🏃`Launch_Day_Tester/Launch_Day_Tester.ino`: Extra file to put various tests in
+- 🏃`TUFF_Calibrator/TUFF_Calibrator.ino`: Gets calibration value for tension sensor. See file for details
+- 🏃`TUFF_Flight_Data_Collector/TUFF_Flight_Data_Collector.ino`: Collects data during flight and writes to an SD card
+
 
 # Specs 🔌
 - [High Accuracy S-Beam Load Cell](https://www.omega.com/en-us/force-strain-measurement/load-cells/lc103b/p/LC103B-25): ±0.005 lbs
