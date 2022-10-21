@@ -206,7 +206,7 @@ new_df['Drag'] = drag
 new_df.plot(x = 'Time', y = 'Drag', kind = 'line')
 
 FINAL_DATA = new_df
-new_df.to_csv('Data/CSV_TUFF_DOS_111.CSV', index='Time')
+new_df.to_csv('Data/CSV_TUFF_DOS_112.CSV', index='Time')
 
 # In[ ]:
 # Calculate average drag
