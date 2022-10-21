@@ -3,7 +3,7 @@
 </p>
 
 # Launch: 10/16/2022 🎈
-Arduino code for _TUFF DOS_ payload for the Baloon Payload Program at the University of Maryland. The payload reads tension data from the rope in atmospheric balloon launchs (>50,000 ft).
+Arduino code for _TUFF DOS_ payload for the Balloon Payload Program at the University of Maryland. The payload reads tension data from the rope in atmospheric balloon launches (>50,000 ft).
 
 Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
 
