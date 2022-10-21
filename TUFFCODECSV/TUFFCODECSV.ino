@@ -14,8 +14,6 @@
                                   // NOTE: Dependent on Adafruit BusIO 1.11.1 by Adafruit.
 #include <Adafruit_BMP280.h>      // BMP280 2.6.1 by Adafruit. 
                                   // NOTE: Dependent on Adafruit Unified Sensor 1.1.4 by Adafruit.
-
-#include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
@@ -90,7 +88,7 @@ void setup() {
   loadcell.set_scale(LOADCELL_DIVIDER);
 
   // Zero scale
-  loadcell.tare(10);
+  loadcell.tare(100);
 
   /* Initialise the Gyro/Accelerometer/Magnometer sensor */
   if(!bno.begin())
@@ -99,7 +97,7 @@ void setup() {
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
   }
   
-  delay(1000);
+  delay(5000);
     
   bno.setExtCrystalUse(true);
 //--------------------------
@@ -160,7 +158,6 @@ void loop() {
     pressure = bmp.readPressure();
     alt = bmp.readAltitude(sealevelpressure);
   //--------------------
-  #if false
     /* Get BNO sensor "event" (it's readings) */ 
     sensors_event_t event; 
     bno.getEvent(&event, Adafruit_BNO055::VECTOR_EULER);
@@ -172,34 +169,6 @@ void loop() {
     bno.getEvent(&event, Adafruit_BNO055::VECTOR_MAGNETOMETER);
     magnometer = event.magnetic;
 
-    /* Display the floating point data */
-    Serial.print("gX: ");
-    Serial.print(abs_orientation.x, 4);
-    Serial.print("\tgY: ");
-    Serial.print(abs_orientation.y, 4);
-    Serial.print("\tgZ: ");
-    Serial.print(abs_orientation.z, 4);
-    Serial.println("");
-
-    Serial.print("aX: ");
-    Serial.print(acceleration.x, 4);
-    Serial.print("\taY: ");
-    Serial.print(acceleration.y, 4);
-    Serial.print("\taZ: ");
-    Serial.print(acceleration.z, 4);
-    Serial.println("");
-
-
-    Serial.print("mX: ");
-    Serial.print(magnometer.x, 4);
-    Serial.print("\tmY: ");
-    Serial.print(magnometer.y, 4);
-    Serial.print("\tmZ: ");
-    Serial.print(magnometer.z, 4);
-    Serial.println("");
-
-    Serial.println("");
-    #endif
     // ==========Writing Data==========
 
     
@@ -225,7 +194,7 @@ void loop() {
       dataFile.print(alt);
       dataFile.print(",");
 
-/*
+
       // BNO 9-Axis data
       dataFile.print(abs_orientation.x);
       dataFile.print(",");
@@ -248,12 +217,7 @@ void loop() {
       dataFile.print(magnometer.z);
       dataFile.print(",");
 
-*/
-
-      
-
       dataFile.println();
-
     }
     
     else {
@@ -268,6 +232,6 @@ void loop() {
     Serial.print("Tension: "); Serial.print(tension); Serial.print(" lbs");
     Serial.print(',');
     Serial.println();   
-    */ 
+    */
     
 }

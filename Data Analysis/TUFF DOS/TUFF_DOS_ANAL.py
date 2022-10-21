@@ -315,7 +315,7 @@ from scipy.fft import rfft, rfftfreq
 # Input the number of seconds you wish to test over and what the start time is.
 # Data starts around 2168 seconds.
 SECONDS = 60
-START_TIME = 4000
+START_TIME = 5300
 
 
 # Samples is seconds * average_hz.
@@ -338,10 +338,12 @@ yf = rfft(np.array(new_df['Tension'][start_index:samples + start_index]
 xf = rfftfreq(samples, 1 / sample_rate)
 
 
-
+plt.xlabel('Frequency (hz)')
+plt.ylabel('Intensity')
+plt.title('Fast Fourier transform of tension from the time space to the frequency space ')
 plt.xlim((0, 1))
 plt.plot(xf, np.abs(yf))
-plt.plot([0.135, 0.135], [-50, 400], 'k-', lw=2, color = 'red')
+#plt.plot([0.3, 0.3], [-50, 1000], 'k-', lw=2, color = 'red')
 plt.show()
 
 

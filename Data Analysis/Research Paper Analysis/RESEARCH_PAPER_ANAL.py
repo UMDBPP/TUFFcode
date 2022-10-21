@@ -250,7 +250,7 @@ from scipy.fft import rfft, rfftfreq
 # Input the number of seconds you wish to test over and what the start time is.
 # Data starts around 2168 seconds.
 SECONDS = 60
-START_TIME = 4000
+START_TIME = 4500
 
 
 # Samples is seconds * average_hz.
@@ -277,7 +277,7 @@ xf = rfftfreq(samples, 1 / sample_rate)
 plt.xlim((0, 1))
 plt.plot(xf, np.abs(yf))
 #plt.plot([0.135, 0.135], [-50, 400], 'k-', lw=2, color = 'red')
-plt.xlabel('Frequency (hz)')
+plt.xlabel('Frequency (Hz)')
 plt.ylabel('Intensity')
 plt.title('Fast Fourier transform of tension from the time space to the frequency space ')
 plt.show()
@@ -285,7 +285,7 @@ plt.show()
 
 
 # Analysis:
-# There seems to be a spike around 0.16 hz and a smaller spike around 0.64 hz.
+# There seems to be a spike around 0.16 Hz and a smaller spike around 0.64 Hz.
 
 
 #In[]:

@@ -41,7 +41,7 @@ const int LOADCELL_SCK_PIN = 3;
  =========================================================================== */
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("BEGIN CALIBRATION CODE");
 
   // Declare LED as an output pin and turn it off
@@ -52,7 +52,7 @@ void setup() {
   loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
 
   // Reset or "zero" loadcell readings.
-  loadcell.set_scale();
+  loadcell.set_scale(169570.1038);
   loadcell.tare(100);
 
   // Gives the load cell 1 second to ensure it finishes its startup
@@ -72,7 +72,7 @@ void setup() {
 void loop() {
 
   // This averages the load cell's value across 250 readings.
-  float tension = loadcell.get_value(250);
+  float tension = loadcell.get_units();
 
   Serial.print("Tension: ");
   Serial.println(tension);
