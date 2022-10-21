@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 # Define constant file name
-OG_DATA_LOG = 'Data/DATALOG_7_31_DOS.TXT'
+OG_DATA_LOG = 'Data/TUFF_DOS_112.TXT'
 
 # Set pyplot preferences
 plt.rcParams["figure.figsize"] = [7.50, 3.50]
@@ -120,11 +120,19 @@ for outlier_index in outliers:
 
 # In[265]:
 # Get rid of junk values from before and after launch
-# Start index: 93542 (2166 seconds, 10:14:47)
-# End index: 287140 (8497 seconds, 12:00:17)
-# Balloon "popped": 228088  --> 134546 f/ new_df (6272 seconds, 11:23:12)
+# Start index: 328599 (8831 seconds, ??:??:??)
+# End index: 577965 (15056 seconds, ??:??:??)
+# Balloon "popped": 456464  --> 127865 f/ new_df (6272 seconds, 11:23:12)
 
-new_df = read_file[93541:287140]
+new_df = read_file[328599:577965]
+
+# A calibration weight was placed on TUFF DOS before the launch.
+CALIBRATION_WEIGHT = 4.4236
+MEASURED_WEIGHT = 3.91
+
+# Adjust the tension values based on calibrated values 
+new_df['Tension'] *= CALIBRATION_WEIGHT / MEASURED_WEIGHT
+
 
 # In[274]:
 #---------------------------------
@@ -158,7 +166,7 @@ new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot,
 # The data for angle x and angle z are essentially unreadable in this form.
 
 # The index of the balloon pop.
-POP_POINT = 134546
+POP_POINT = 127865
 
 start_index = new_df.index[0]
 accel_outliers = np.where(new_df['AccelerationZ'] == 0)[0]
@@ -179,7 +187,7 @@ imu_df.plot(x = 'Time', y = 'Average_accelerationZ', kind = 'line')
 # In[ ]:
 # Calculate drag
 
-weight = 5.22
+weight = 3.8289
 weight_array_a = np.full([POP_POINT], weight)
 weight_array_d = np.full([len(new_df) - POP_POINT], weight)
 array_of_ascent_tension = new_df[:POP_POINT]['Tension']
@@ -290,7 +298,7 @@ from scipy.fft import rfft, rfftfreq
 # Input the number of seconds you wish to test over and what the start time is.
 # Data starts around 2168 seconds.
 SECONDS = 60
-START_TIME = 5300
+START_TIME = 9500
 
 
 # Samples is seconds * average_hz.
@@ -347,3 +355,5 @@ y = new_df['Altitude'].to_numpy()
 # 3. 20919.24 m at index 134544 (6272.5 seconds)
 
 # The 3rd spike is probably the balloon pop at max altitude.
+
+# %%
