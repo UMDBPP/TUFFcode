@@ -120,18 +120,21 @@ for outlier_index in outliers:
 
 # In[265]:
 # Get rid of junk values from before and after launch
-# Start index: 328599 (8831 seconds, ??:??:??)
-# End index: 577965 (15056 seconds, ??:??:??)
-# Balloon "popped": 456464  --> 127865 f/ new_df (6272 seconds, 11:23:12)
+# Start index: 328599 (8831 seconds)
+# End index: 577965 (15056 seconds)
+# Balloon "popped": 456464  --> 127865 f/ new_df (6272 seconds)
 
-new_df = read_file[328599:577965]
+dos_112_df = read_file[328599:577965]
 
 # A calibration weight was placed on TUFF DOS before the launch.
 CALIBRATION_WEIGHT = 4.4236
 MEASURED_WEIGHT = 3.91
 
 # Adjust the tension values based on calibrated values 
-new_df['Tension'] *= CALIBRATION_WEIGHT / MEASURED_WEIGHT
+dos_112_df['Tension'] *= CALIBRATION_WEIGHT / MEASURED_WEIGHT
+
+# Convert altitude values from m into ft
+dos_112_df['Altitude'] *= 3.28084
 
 
 # In[274]:
@@ -140,26 +143,36 @@ new_df['Tension'] *= CALIBRATION_WEIGHT / MEASURED_WEIGHT
 # Tension, Altitude, and Temperature
 
 # Just Tension
-new_df.plot(x ='Time', y='Tension', kind = 'line')
+dos_112_df.plot(x ='Time', y='Tension', kind = 'line')
 
-# Tension and altitude
-tension_plot = new_df.plot(x ='Time', y='Tension', kind = 'line')
-new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
-            secondary_y = True)
+# Graph Time vs. Tension
+tension_plot = dos_112_df.plot(x = 'Time', y = 'Tension', kind = 'line', 
+                 title = 'Time vs. Tension and Altitude')
+alt_plot = dos_112_df.plot(x ='Time', y='Altitude', kind = 'line', xlabel = 'Time (seconds)', 
+                 ax = tension_plot, secondary_y = True)
+
+tension_plot.set_ylabel('Tension (lbs)')
+alt_plot.set_ylabel('Altitude (ft)')
 
 # Temperature 
-new_df.plot(x ='Time', y='Temperature', kind = 'line')
+dos_112_df.plot(x ='Time', y='Temperature', kind = 'line')
 
 # In[]:
 # Average Tension
 
 # Find average tension at different points
-new_df['Average_tension'] = new_df['Tension'].rolling(500).mean()
+dos_112_df['Average_tension'] = dos_112_df['Tension'].rolling(500).mean()
 
 # Plot average tension and altitude
-tension_plot = new_df.plot(x ='Time', y ='Average_tension', kind = 'line')
-new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
-            secondary_y = True)
+tension_plot = dos_112_df.plot(x = 'Time', y = 'Average_tension', kind = 'line', 
+                 title = 'Time vs. Average Tension and Altitude')
+alt_plot = dos_112_df.plot(x ='Time', y='Altitude', kind = 'line', xlabel = 'Time (seconds)', 
+                 ax = tension_plot, secondary_y = True)
+
+tension_plot.set_ylabel('Average Tension (lbs)')
+alt_plot.set_ylabel('Altitude (ft)')
+
+
 
 # In[]:
 # Gyro and Accelerometer
@@ -168,13 +181,16 @@ new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot,
 # The index of the balloon pop.
 POP_POINT = 127865
 
-start_index = new_df.index[0]
-accel_outliers = np.where(new_df['AccelerationZ'] == 0)[0]
+start_index = dos_112_df.index[0]
+accel_outliers = np.where(dos_112_df['AccelerationZ'] == 0)[0]
 accel_outliers += start_index
-imu_df = new_df.copy()
+imu_df = dos_112_df.copy()
 
 # Remove outliers
 imu_df.drop(accel_outliers, inplace = True)
+
+# Remove acceleration due to gravity
+imu_df['AccelerationZ'] += 9.80057
 
 
 imu_df.plot(x = 'Time', y = 'AccelerationZ', kind = 'line')
@@ -189,9 +205,9 @@ imu_df.plot(x = 'Time', y = 'Average_accelerationZ', kind = 'line')
 
 weight = 3.8289
 weight_array_a = np.full([POP_POINT], weight)
-weight_array_d = np.full([len(new_df) - POP_POINT], weight)
-array_of_ascent_tension = new_df[:POP_POINT]['Tension']
-array_of_descent_tension = new_df[POP_POINT:]['Tension']
+weight_array_d = np.full([len(dos_112_df) - POP_POINT], weight)
+array_of_ascent_tension = dos_112_df[:POP_POINT]['Tension']
+array_of_descent_tension = dos_112_df[POP_POINT:]['Tension']
 
 # Performs weight arithmetic
 drag_ascent = np.subtract(array_of_ascent_tension.to_numpy(), weight_array_a)
@@ -201,17 +217,17 @@ drag_descent = np.subtract(weight_array_d, array_of_descent_tension.to_numpy())
 # Concatenates drags
 drag = np.concatenate((drag_ascent, drag_descent))
 
-new_df['Drag'] = drag
+dos_112_df['Drag'] = drag
 
-new_df.plot(x = 'Time', y = 'Drag', kind = 'line')
+dos_112_df.plot(x = 'Time', y = 'Drag', kind = 'line')
 
-FINAL_DATA = new_df
-new_df.to_csv('Data/CSV_TUFF_DOS_112.CSV', index='Time')
+FINAL_DATA = dos_112_df
+dos_112_df.to_csv('Data/CSV_TUFF_DOS_112.CSV', index='Time')
 
 # In[ ]:
 # Calculate average drag
 
-drag_df = new_df
+drag_df = dos_112_df
 
 # Plot drag against altitude
 drag_plot = drag_df.plot(x = 'Time', y = 'Drag', kind = 'line')
@@ -225,7 +241,7 @@ drag_plot.axvline(x = drag_df['Time'][time_8k], color = 'red', linestyle = 'dash
 drag_plot.axvline(x = drag_df['Time'][time_15k], color = 'red', linestyle = 'dashed')
 
 # Find average drag at different points
-drag_df['Average_drag'] = new_df['Drag'].rolling(500).mean()
+drag_df['Average_drag'] = dos_112_df['Drag'].rolling(500).mean()
 
 # Plot average drag against altitude
 drag_plot = drag_df.plot(x = 'Time', y = 'Average_drag', kind = 'line')
@@ -249,13 +265,13 @@ drag_df.plot(x ='Time', y='Altitude', kind = 'line', ax = drag_plot, secondary_y
 # In[]:
 # Find ascent/descent tension (below 10,000 ft)
 
-# Get tensions above 10,000 ft (convert m to ft)
-above_10k_ft = np.where(new_df['Altitude'] >= 10000 * 0.3048)[0]
+# Get tensions above 10,000 ft
+above_10k_ft = np.where(dos_112_df['Altitude'] >= 10000)[0]
 first_10k = above_10k_ft[0]
 second_10k = above_10k_ft[-1]
 
-ascent_tension = new_df['Tension'][1000:first_10k].mean()
-descent_tension = new_df['Tension'][second_10k:-1000].mean()
+ascent_tension = dos_112_df['Tension'][1000:first_10k].mean()
+descent_tension = dos_112_df['Tension'][second_10k:-1000].mean()
 
 print("Ascent tension: " + str(ascent_tension))
 print("Descent tension: " + str(descent_tension))
@@ -271,7 +287,7 @@ print("Descent tension: " + str(descent_tension))
 # In[]
 # Find ascent rate. Use linear algebra and get "m" 
 # (gradient of line ot fit)f bes
-ascent_df = new_df[1500:first_10k].copy()
+ascent_df = dos_112_df[1500:first_10k].copy()
 ascent_df['ones'] = 1
 A = ascent_df[['Time','ones']]
 y = ascent_df['Altitude']
@@ -279,7 +295,7 @@ m, c = np.linalg.lstsq(A,y)[0]
 
 print("Ascent rate: " + str(m))
 
-descent_df = new_df[second_10k:-1000].copy()
+descent_df = dos_112_df[second_10k:-1000].copy()
 descent_df['ones'] = 1
 A = descent_df[['Time','ones']]
 y = descent_df['Altitude']
@@ -298,25 +314,25 @@ from scipy.fft import rfft, rfftfreq
 # Input the number of seconds you wish to test over and what the start time is.
 # Data starts around 2168 seconds.
 SECONDS = 60
-START_TIME = 9500
+START_TIME = 9300
 
 
 # Samples is seconds * average_hz.
 samples = SECONDS *  32
 
 # Find the index corresponding to the START_TIME
-start_index = np.where(new_df['Time'] == START_TIME)[0][0]
+start_index = np.where(dos_112_df['Time'] == START_TIME)[0][0]
 
 # Find the hertz rate of this slice
-time_array = new_df['Time'][start_index:samples + start_index].to_numpy()
+time_array = dos_112_df['Time'][start_index:samples + start_index].to_numpy()
 sample_rate = len(time_array) / (time_array[-1] - time_array[0])
 sample_rate = int(sample_rate)  # Convert to int.
 
 # Apply real Fast Fourier Transform (real FFT) to the data. Take a slice of
 # data with "SAMPLES" number of data points. Zero the mean to improve
 # result quality.
-yf = rfft(np.array(new_df['Tension'][start_index:samples + start_index]
-                   -new_df['Tension'][start_index:samples + start_index]
+yf = rfft(np.array(dos_112_df['Tension'][start_index:samples + start_index]
+                   -dos_112_df['Tension'][start_index:samples + start_index]
                    .mean()))
 xf = rfftfreq(samples, 1 / sample_rate)
 
@@ -338,22 +354,22 @@ plt.show()
 # This may tell us jetstream altitude locations. 
 # Keep an eye on the "spikes" in tension variance.
 
-new_df['Variance'] = new_df['Tension'].rolling(1000).var()
+dos_112_df['Variance'] = dos_112_df['Tension'].rolling(1000).var()
 
-variance_plot = new_df.plot(x ='Time', y='Variance', kind = 'line')
-alt_plot = new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = variance_plot, secondary_y = True)
+variance_plot = dos_112_df.plot(x ='Time', y='Variance', kind = 'line',
+                                 title = 'Variance and Altitude vs Time')
+alt_plot = dos_112_df.plot(x ='Time', y='Altitude', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = variance_plot, 
+                            secondary_y = True)
 
-variance_plot.set_ylabel('Variance')
-alt_plot.set_ylabel('Altitude')
+variance_plot.set_ylabel('Variance (lbs^2)')
+alt_plot.set_ylabel('Altitude (ft)')
 
-x = new_df['Time'].to_numpy()
-y = new_df['Altitude'].to_numpy()
+# 1 Spike: 
+# 1. 48986.88 ft at index 476299 (12436.475 seconds)
 
-# 3 Spikes: 
-# 1. 16499.35 m at index 195534 (5158 seconds)
-# 2. 17563.90 m at index 201939 (5371.8 seconds)
-# 3. 20919.24 m at index 134544 (6272.5 seconds)
+# There was no spike at the zenith because there was no balloon pop.
 
-# The 3rd spike is probably the balloon pop at max altitude.
+# In[ ]:
+# Add your code here!
 
-# %%
