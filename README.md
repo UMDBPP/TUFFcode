@@ -7,6 +7,9 @@ Arduino code for _TUFF DOS_ payload for the Balloon Payload Program at the Unive
 
 Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
 
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/32310846/197653943-cb48b95a-080f-4381-9ff6-abcb2744c0a2.jpeg"  width="1000" />
+</p>
 -------
 
 ## Quickstart 🚀
@@ -47,10 +50,11 @@ The code is broken up as follows:
 - 9 Volt battery
 
 <p align="center">
-    <img src="https://user-images.githubusercontent.com/32310846/188052753-d0e78f5d-4c42-4c82-abd4-9912e4d3c57b.jpg"  width="1500" />
+    <img src="https://user-images.githubusercontent.com/32310846/197654118-b540db57-1fec-4d6f-9f25-5f9d3cf12ee3.jpeg"  width="1000" />
 </p>
 
-# Preceeding Flights ⏪
+# Preceeding Flights ⏪!
+
 - TUFF 105          Nov 14,     2021
 - TUFF 110          Mar 5,      2022
 - TUFF DOS 111      July 31,    2022
