@@ -21,8 +21,8 @@ git clone https://github.com/Gidntsquia/TUFFcode
 OR...
 
 1. Download [Arduino IDE](https://www.arduino.cc/en/software)
-2. Download TUFFCODECSV.ino (or copy paste)
-4. Run TUFFCODECSV.ino with payload resting flat
+2. Download [TUFF_Flight_Data_Collector.ino](TUFF_Flight_Data_Collector/TUFF_Flight_Data_Collector.ino) (or copy paste)
+4. Run [TUFF_Flight_Data_Collector.ino](TUFF_Flight_Data_Collector/TUFF_Flight_Data_Collector.ino) with payload hanging load free 
 5. You're ready to launch!
 
 Note: Run TUFF_calibration with its experiment procedure for more accurate readings
