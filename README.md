@@ -10,6 +10,7 @@ Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
 <p align="center">
     <img src="https://user-images.githubusercontent.com/32310846/197653943-cb48b95a-080f-4381-9ff6-abcb2744c0a2.jpeg"  width="1000" />
 </p>
+
 -------
 
 ## Quickstart 🚀
