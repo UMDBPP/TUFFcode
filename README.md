@@ -31,12 +31,12 @@ Note: Run TUFF_calibration with its experiment procedure for more accurate readi
 ## Code Structure 📁
 The code is broken up as follows:
 
-- 📁`Data Analysis`: Python Juypter Notebook analysis of TUFF data
-    - 📁`Data`: All data collected across our 4 flights. Includes formatted and unformatted data
-    - 🏃`*.py`: Files with analysis. Run them to see graphs of our data 
-- 🏃`Launch_Day_Tester/Launch_Day_Tester.ino`: Extra file to put various tests in
-- 🏃`TUFF_Calibrator/TUFF_Calibrator.ino`: Gets calibration value for tension sensor. See file for details
-- 🏃`TUFF_Flight_Data_Collector/TUFF_Flight_Data_Collector.ino`: Collects data during flight and writes to an SD card
+- [📁](Data%20Analysis)`Data Analysis`: Python Juypter Notebook analysis of TUFF data
+    - [📁](Data%20Analysis/Data)`Data`: All data collected across our 4 flights. Includes formatted and unformatted data
+    - [🏃](Data%20Analysis/TUFF_DOS_112_ANAL.py)`*.py`: Files with analysis. Run them to see graphs of our data 
+- [🏃](Launch_Day_Tester/Launch_Day_Tester.ino)`Launch_Day_Tester/Launch_Day_Tester.ino`: Extra file to put various tests in
+- [🏃](TUFF_Calibrator/TUFF_Calibrator.ino)`TUFF_Calibrator/TUFF_Calibrator.ino`: Gets calibration value for tension sensor. See file for details
+- [🏃](TUFF_Flight_Data_Collector/TUFF_Flight_Data_Collector.ino)`TUFF_Flight_Data_Collector/TUFF_Flight_Data_Collector.ino`: Collects data during flight and writes to an SD card
 
 
 # Specs 🔌
