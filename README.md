@@ -16,7 +16,7 @@ Code by Jeremy Kuznetsov, Jim Oliver Villegas, and Jaxon Lee.
 ## Quickstart 🚀
 ```
 sudo snap install arduino
-git clone https://github.com/Gidntsquia/TUFFcode
+git clone https://github.com/UMDBPP/TUFFcode
 ```
 OR...
 
