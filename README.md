@@ -54,7 +54,7 @@ The code is broken up as follows:
     <img src="https://user-images.githubusercontent.com/32310846/197654118-b540db57-1fec-4d6f-9f25-5f9d3cf12ee3.jpeg"  width="1000" />
 </p>
 
-# Preceeding Flights ⏪!
+# Preceding Flights ⏪!
 
 - TUFF 105          Nov 14,     2021
 - TUFF 110          Mar 5,      2022
