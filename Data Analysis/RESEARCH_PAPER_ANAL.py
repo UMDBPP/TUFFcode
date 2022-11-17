@@ -131,7 +131,20 @@ tuff_110_df.plot(x = 'Time', y = 'Average Drag', kind = 'line',
 #In[]:
 # ----------- Variance -----------
 # The variance of the tension data during the TUFF DOS launch
+# Variance
+# This may tell us jetstream altitude locations. 
+# Keep an eye on the "spikes" in tension variance.
 
+tuff_110_df['Variance'] = tuff_110_df['Tension'].rolling(1000).var()
+
+variance_plot = tuff_110_df.plot(x ='Time', y='Variance', kind = 'line',
+                                 title = 'Variance and Altitude vs Time')
+alt_plot = tuff_110_df.plot(x ='Time', y='Altitude', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = variance_plot, 
+                            secondary_y = True)
+
+variance_plot.set_ylabel('Variance (lbs^2)')
+alt_plot.set_ylabel('Altitude (ft)')
 
 
 # ^^^^^^^ TUFF 110
