@@ -351,6 +351,44 @@ plt.show()
 # There seems to be a spike around 0.16 hz and a smaller spike around 0.64 hz.
 
 # In[ ]:
+# Dominant Oscillations (hz)
+def find_max_oscillation(tension_data):
+    # Samples is seconds * average_hz.
+    samples = len(tension_data)
+    
+    # Find the index corresponding to the START_TIME. 328599 is the first
+    # index of the data array, so it's needed as an offset.
+    start_index = tension_data.index[0] - new_df.index[0]
+    
+    # Only run FFT code if start index is valid
+    if (np.isnan(start_index) or len(tension_data) <= 0):
+        return start_index
+    else: 
+        # Find the hertz rate of this slice
+        time_array = new_df['Time'][start_index:samples + start_index].to_numpy()
+        sample_rate = len(time_array) / (time_array[-1] - time_array[0])
+        sample_rate = int(sample_rate)  # Convert to int.
+
+        # Apply real Fast Fourier Transform (real FFT) to the data. Take a slice of
+        # data with "SAMPLES" number of data points. Zero the mean to improve
+        # result quality.
+        yf = rfft(np.array(new_df['Tension'][start_index:samples + start_index]
+                        -new_df['Tension'][start_index:samples + start_index]
+                        .mean()))
+        xf = rfftfreq(samples, 1 / sample_rate)
+        
+        index_of_highest_hz = np.where(yf== yf.max())[0][0]
+        
+        return xf[index_of_highest_hz]
+
+
+find_max_oscillation(new_df['Tension'][407471- 328599: 407471-328599 + 2400])
+
+# Rolling dominant oscillation calculation of around 60 seconds each
+#dos_112_df['Dominant_oscillation'] = pd.rolling_apply()
+new_df['Dominant_oscillation'] = new_df['Tension'].rolling(2400).apply(find_max_oscillation)
+
+# In[ ]:
 # Variance
 # This may tell us jetstream altitude locations. 
 # Keep an eye on the "spikes" in tension variance.
@@ -372,3 +410,29 @@ y = new_df['Altitude'].to_numpy()
 # 3. 20919.24 m at index 134544 (6272.5 seconds)
 
 # The 3rd spike is probably the balloon pop at max altitude.
+
+# In[ ]:
+# In[]:
+
+new_df['Average_dominant_oscillation'] = new_df['Dominant_oscillation'].rolling(100).mean()
+# Graph dominant oscillations
+dominant_oscillation_plot = new_df.plot(x ='Time', y='Average_dominant_oscillation', kind = 'line',
+                                 title = 'Dominant Oscillation Rate and Altitude vs Time')
+alt_plot = new_df.plot(x ='Time', y='Altitude', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = dominant_oscillation_plot, 
+                            secondary_y = True)
+
+dominant_oscillation_plot.set_ylabel('Dominant Oscillation Rate (hz)')
+alt_plot.set_ylabel('Altitude (ft)')
+
+dominant_oscillation_plot = new_df.plot(x ='Time', y='Average_dominant_oscillation', kind = 'line',
+                                 title = 'Dominant Oscillation Rate and Variance vs Time')
+variance_plot = new_df.plot(x ='Time', y='Variance', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = dominant_oscillation_plot, 
+                            secondary_y = True)
+
+dominant_oscillation_plot.set_ylabel('Dominant Oscillation Rate (hz)')
+variance_plot.set_ylabel('Variance (lb^2)')
+
+
+# %%

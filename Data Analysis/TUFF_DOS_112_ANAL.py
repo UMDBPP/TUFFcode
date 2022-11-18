@@ -1,9 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
+# This program analyzes TUFF DOS 112 Payload data. The launch was  10/16/22.
+# The first half works the data into a usable form. The second half analyzes
+# the data.
 # 
-# This program analyzes TUFF DOS Payload data. The first half works the
-# data into a usable form. The second half analyzes the data.
+# Intial analysis--
+# Average HZ: 40.06
+# Ascent / Descent Tension:  4.50 lbs / 3.58 lbs
+# Everything below TUFF: 3.8289 lbs
+# Ascent Rate: 18.63 ft/s
+#
 # Conclusions:
+# The data seems to be similar to that of TUFF DOS 111, which is what we 
+# expected.
 #
 # Code written by Oliver Villegas and Jaxon Lee.
 
@@ -131,7 +140,7 @@ CALIBRATION_WEIGHT = 4.4236
 MEASURED_WEIGHT = 3.91
 
 # Adjust the tension values based on calibrated values 
-dos_112_df['Tension'] *= CALIBRATION_WEIGHT / MEASURED_WEIGHT
+#dos_112_df['Tension'] *= CALIBRATION_WEIGHT / MEASURED_WEIGHT
 
 # Convert altitude values from m into ft
 dos_112_df['Altitude'] *= 3.28084
@@ -179,7 +188,7 @@ alt_plot.set_ylabel('Altitude (ft)')
 # The data for angle x and angle z are essentially unreadable in this form.
 
 # The index of the balloon pop.
-POP_POINT = 127865
+POP_POINT = np.where(dos_112_df['Altitude'] == dos_112_df['Altitude'].max())[0][0]
 
 start_index = dos_112_df.index[0]
 accel_outliers = np.where(dos_112_df['AccelerationZ'] == 0)[0]
@@ -203,6 +212,7 @@ imu_df.plot(x = 'Time', y = 'Average_accelerationZ', kind = 'line')
 # In[ ]:
 # Calculate drag
 
+# Weight below TUFF DOS (Ping pong balls, Panoramic, Selfie)
 weight = 3.8289
 weight_array_a = np.full([POP_POINT], weight)
 weight_array_d = np.full([len(dos_112_df) - POP_POINT], weight)
@@ -250,16 +260,6 @@ drag_df.plot(x ='Time', y='Altitude', kind = 'line', ax = drag_plot, secondary_y
 # Put lines where jet stream begins and ends
 #drag_plot.axvline(x = drag_df['Time'][time_8k], color = 'red', linestyle = 'dashed')
 #drag_plot.axvline(x = drag_df['Time'][time_15k], color = 'red', linestyle = 'dashed')
-
-
-# In[]
-# Modified tension
-
-# Correct for potential erroneous loadcell divider. Optimal: 32.70%
-#new_df['Tension'] *= 1.3270
-#tension_plot = new_df.plot(x ='Time', y='Tension', kind = 'line')
-#new_df.plot(x ='Time', y='Altitude', kind = 'line', ax = tension_plot, 
-#            secondary_y = True)
 
 
 # In[]:
@@ -314,11 +314,11 @@ from scipy.fft import rfft, rfftfreq
 # Input the number of seconds you wish to test over and what the start time is.
 # Data starts around 2168 seconds.
 SECONDS = 60
-START_TIME = 9300
+START_TIME = 9700
 
 
 # Samples is seconds * average_hz.
-samples = SECONDS *  32
+samples = SECONDS *  40
 
 # Find the index corresponding to the START_TIME
 start_index = np.where(dos_112_df['Time'] == START_TIME)[0][0]
@@ -347,7 +347,46 @@ plt.show()
 
 
 # Analysis:
-# There seems to be a spike around 0.16 hz and a smaller spike around 0.64 hz.
+
+# In[ ] :
+# Dominant Oscillations (hz)
+def find_max_oscillation(tension_data):
+    # Samples is seconds * average_hz.
+    samples = len(tension_data)
+    
+    # Find the index corresponding to the START_TIME. 328599 is the first
+    # index of the data array, so it's needed as an offset.
+    start_index = tension_data.index[0] - 328599
+    
+    # Only run FFT code if start index is valid
+    if (np.isnan(start_index) or len(tension_data) <= 0):
+        return start_index
+    else: 
+        # Find the hertz rate of this slice
+        time_array = dos_112_df['Time'][start_index:samples + start_index].to_numpy()
+        sample_rate = len(time_array) / (time_array[-1] - time_array[0])
+        sample_rate = int(sample_rate)  # Convert to int.
+
+        # Apply real Fast Fourier Transform (real FFT) to the data. Take a slice of
+        # data with "SAMPLES" number of data points. Zero the mean to improve
+        # result quality.
+        yf = rfft(np.array(dos_112_df['Tension'][start_index:samples + start_index]
+                        -dos_112_df['Tension'][start_index:samples + start_index]
+                        .mean()))
+        xf = rfftfreq(samples, 1 / sample_rate)
+        
+        index_of_highest_hz = np.where(yf== yf.max())[0][0]
+        
+        return xf[index_of_highest_hz]
+
+
+#find_max_oscillation(dos_112_df['Tension'][407471- 328599: 407471-328599 + 2400])
+
+# Rolling dominant oscillation calculation of around 60 seconds each
+#dos_112_df['Dominant_oscillation'] = pd.rolling_apply()
+dos_112_df['Dominant_oscillation'] = dos_112_df['Tension'].rolling(2400).apply(find_max_oscillation)
+
+
 
 # In[ ]:
 # Variance
@@ -369,6 +408,54 @@ alt_plot.set_ylabel('Altitude (ft)')
 # 1. 48986.88 ft at index 476299 (12436.475 seconds)
 
 # There was no spike at the zenith because there was no balloon pop.
+
+# In[]:
+# In[]:
+# Graph dominant oscillations
+
+dos_112_df['Average_dominant_oscillation'] = dos_112_df['Dominant_oscillation'].rolling(500).mean()
+
+
+dominant_oscillation_plot = dos_112_df.plot(x ='Time', y='Average_dominant_oscillation', kind = 'line',
+                                 title = 'Dominant Oscillation Rate and Altitude vs Time')
+alt_plot = dos_112_df.plot(x ='Time', y='Altitude', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = dominant_oscillation_plot, 
+                            secondary_y = True)
+
+dominant_oscillation_plot.set_ylabel('Dominant Oscillation Rate (hz)')
+alt_plot.set_ylabel('Altitude (ft)')
+
+dominant_oscillation_plot = dos_112_df.plot(x ='Time', y='Average_dominant_oscillation', kind = 'line',
+                                 title = 'Dominant Oscillation Rate and Variance vs Time')
+variance_plot = dos_112_df.plot(x ='Time', y='Variance', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = dominant_oscillation_plot, 
+                            secondary_y = True)
+
+dominant_oscillation_plot.set_ylabel('Dominant Oscillation Rate (hz)')
+variance_plot.set_ylabel('Variance (lb^2)')
+
+
+ascent_df = dos_112_df[:POP_POINT]
+
+
+dominant_oscillation_plot = ascent_df.plot(x ='Time', y='Average_dominant_oscillation', kind = 'line',
+                                 title = 'Dominant Oscillation Rate and Altitude vs Time')
+alt_plot = ascent_df.plot(x ='Time', y='Altitude', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = dominant_oscillation_plot, 
+                            secondary_y = True)
+
+dominant_oscillation_plot.set_ylabel('Dominant Oscillation Rate (hz)')
+alt_plot.set_ylabel('Altitude (ft)')
+
+dominant_oscillation_plot = ascent_df.plot(x ='Time', y='Average_dominant_oscillation', kind = 'line',
+                                 title = 'Dominant Oscillation Rate and Variance vs Time')
+variance_plot = ascent_df.plot(x ='Time', y='Variance', kind = 'line', 
+                            xlabel = 'Time (seconds)', ax = dominant_oscillation_plot, 
+                            secondary_y = True)
+
+dominant_oscillation_plot.set_ylabel('Dominant Oscillation Rate (hz)')
+variance_plot.set_ylabel('Variance (lb^2)')
+
 
 # In[ ]:
 # Add your code here!
