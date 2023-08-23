@@ -5,7 +5,7 @@
 # Launch: 10/16/2022 🎈
 Arduino code for _TUFF DOS_ payload for the Balloon Payload Program at the University of Maryland. The payload reads tension data from the rope in atmospheric balloon launches (>50,000 ft).
 
-Code by Jeremy Kuznetsov, Jim Oliver Villegas, Jaxon Lee, and Malcolm Maas.
+Code by Jeremy Kuznetsov, Jim Oliver Villegas, Jaxon Lee, Malcolm Maas, and Daniel Grammer.
 
 <p align="center">
     <img src="https://user-images.githubusercontent.com/32310846/197653943-cb48b95a-080f-4381-9ff6-abcb2744c0a2.jpeg"  width="1000" />
